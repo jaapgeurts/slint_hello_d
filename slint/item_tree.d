@@ -1,10 +1,15 @@
 module slint.item_tree;
 
-import core.stdc.stdint : uint32_t;
+import core.stdc.stdint : uint32_t, uint8_t;
 
 import slint.internal;
 import slint.vtable;
 import slint.timer;
+import slint.string_internal;
+
+alias ItemRef = VRef!(ItemVTable);
+alias ItemArrayEntry = VOffset!(uint8_t, ItemVTable, AllowPin);
+alias ItemArray = Slice!(ItemArrayEntry);
 
 ItemTreeNode make_item_node(uint32_t child_count, uint32_t child_index,
         uint32_t parent_index, uint32_t item_array_index, bool is_accessible) {
@@ -17,14 +22,12 @@ ItemTreeNode make_dyn_node(uint32_t offset, uint32_t parent_index) {
             offset, parent_index));
 }
 
-// inline ItemRef get_item_ref(ItemTreeRef item_tree,
-//                             const cbindgen_private::Slice<ItemTreeNode> item_tree_array,
-//                             const private_api::ItemArray item_array, int index)
-// {
-//     const auto item_array_index = item_tree_array.ptr[index].item.item_array_index;
-//     const auto item = item_array[item_array_index];
-//     return ItemRef { item.vtable, reinterpret_cast<char *>(item_tree.instance) + item.offset };
-// }
+ItemRef get_item_ref(ItemTreeRef item_tree,
+        const Slice!(ItemTreeNode) item_tree_array, const ItemArray item_array, int index) {
+    const auto item_array_index = item_tree_array.ptr[index].item.item_array_index;
+    const auto item = item_array[item_array_index];
+    return ItemRef(item.vtable, cast(ubyte*)(item_tree.instance) + item.offset);
+}
 
 /// The component handle is like a shared pointer to a component in the generated code.
 /// In order to get a component, use `T::create()` where T is the name of the component

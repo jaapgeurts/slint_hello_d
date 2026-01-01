@@ -22,7 +22,7 @@ public:
     ItemTreeWeak root_weak;
     Window window() {
         if (this.m_window.isNull()) {
-            this.m_window = Nullable!Window(cast(Window) cast(void*) new WindowAdapterRc());
+            this.m_window = Nullable!Window(new Window(new WindowAdapterRc()));
             m_window.get().window_handle().set_component(this.root_weak);
         }
         return this.m_window.get;
@@ -44,7 +44,7 @@ struct MainWindow {
     static ComponentHandle!(MainWindow) create() {
         auto self_rc = VRc!(ItemTreeVTable, MainWindow).make();
         auto self = cast(MainWindow)(self_rc.data());
-        self.self_weak = new VWeak!(ItemTreeVTable, MainWindow)(self_rc).into_dyn();
+        self.self_weak = VWeak!(ItemTreeVTable, MainWindow)(self_rc).into_dyn();
         slint_ensure_backend();
         self.globals = self.m_globals;
         self.m_globals.root_weak = self.self_weak;
@@ -57,7 +57,7 @@ struct MainWindow {
         return new ComponentHandle!MainWindow(self_rc);
     }
 
-    static const ItemTreeVTable static_vtable = ItemTreeVTable(null, null, null, null,
+    static const ItemTreeVTable static_vtable = ItemTreeVTable(null, &get_item_ref, null, null,
             &get_item_tree, null, null, null, null, null, null, null, null,
             null, null, null, null, null);
     // ItemTreeVTable( visit_children, get_item_ref, get_subtree_range, get_subtree, get_item_tree, parent_node, embed_component, subtree_index, layout_info, item_geometry, accessible_role, accessible_string_property, accessibility_action, supported_accessibility_actions, element_infos, window_adapter, drop_in_place<MainWindow>, dealloc );
@@ -163,9 +163,30 @@ struct MainWindow {
     }
 
     // TODO: these original definition methods were static.
-    extern (C) static Slice!(ItemTreeNode) get_item_tree(ItemTreeRef) {
-        writeln("called get_item_tree()");
-        return item_tree();
+    extern (C) {
+        static Slice!(ItemTreeNode) get_item_tree(ItemTreeRef) {
+            writeln("callback: get_item_tree()");
+            return item_tree();
+        }
+
+        static ItemRef get_item_ref(ItemTreeRef component, uint32_t index) {
+            writeln("callback: get_item_ref");
+            return slint.item_tree.get_item_ref(component,
+                    get_item_tree(component), item_array(), index);
+        }
+
+        static const(ItemArray) item_array() {
+            ItemArrayEntry[] items = [
+                // TODO: fix later
+                // {
+                //     SLINT_GET_ITEM_VTABLE(WindowItemVTable), MainWindow.root_1.offsetof
+                // },
+                // {
+                //     SLINT_GET_ITEM_VTABLE(SimpleTextVTable), MainWindow.text_2.offsetof
+                // }
+            ];
+            return make_slice(items.ptr, items.length);
+        }
     }
 
     static Slice!(ItemTreeNode) item_tree() {

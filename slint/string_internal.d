@@ -11,6 +11,9 @@ extern (C) {
         T* ptr;
         uintptr_t len;
         // const T &operator[](int i) const { return ptr[i]; }
+        const(T) opIndex(size_t i) const {
+            return ptr[i];
+        }
     }
 
     /// Returns a nul-terminated pointer for this string.

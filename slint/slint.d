@@ -51,7 +51,7 @@ import slint.timer;
 // // which will be patched.
 // #        define SLINT_GET_ITEM_VTABLE(VTableName) slint::private_api::slint_get_##VTableName()
 // #    else
-// #        define SLINT_GET_ITEM_VTABLE(VTableName) (&slint::private_api::VTableName)
+// SLINT_GET_ITEM_VTABLE(VTableName) { return &VTableName; }
 // #    endif
 // #endif // !defined(DOXYGEN)
 //
@@ -98,7 +98,7 @@ import slint.timer;
 //
 void register_item_tree(ref VRc!(ItemTreeVTable) c, Nullable!Window maybe_window) {
     const WindowAdapterRcOpaque* window_ptr = !maybe_window.isNull()
-        ? &maybe_window.get.window_handle().handle() : null;
+        ? maybe_window.get.window_handle().handle() : null;
     slint_register_item_tree(c, window_ptr);
 }
 //

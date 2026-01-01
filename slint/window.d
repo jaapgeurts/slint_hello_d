@@ -2,6 +2,7 @@ module slint.window;
 
 import std.typecons;
 import std.traits;
+import std.stdio;
 
 import core.stdc.stdint : uintptr_t, intptr_t, uint8_t, int32_t, uint32_t, uint64_t;
 
@@ -18,7 +19,7 @@ import slint.platform_internal;
 // using ItemTreeRc = vtable::VRc<ItemTreeVTable>;
 // using LogicalPosition;
 
-extern (C) class WindowAdapterRc {
+class WindowAdapterRc {
 public:
     this(WindowAdapterRcOpaque adopted_inner) {
         assert_main_thread();
@@ -27,6 +28,7 @@ public:
 
     this() {
         slint_windowrc_init(&inner);
+        writeln("Create window, WindowAdapterRc.this(), slint_windowrc_init(): ", inner);
     }
 
     ~this() {
@@ -46,6 +48,7 @@ public:
     // }
 
     void show() const {
+        writeln("slint_windowrc_show()");
         slint_windowrc_show(&inner);
     }
 
@@ -92,9 +95,11 @@ public:
         slint_windowrc_set_focus_item(&inner, &item_rc, set_focus, reason);
     }
 
-    void set_component(ItemTreeWeak weak) const {
+    void set_component(ref ItemTreeWeak weak) const {
+        writeln("before set_component()");
         auto item_tree_rc = weak.lock().get().into_dyn();
-        slint_windowrc_set_component(&inner, item_tree_rc);
+        slint_windowrc_set_component(&inner, &item_tree_rc);
+        writeln("after  set_component()");
     }
 
     uint32_t show_popup(Component, Parent, PosGetter)(const Parent* parent_component,
@@ -179,6 +184,7 @@ public:
 
     PhysicalSize size() const {
         // TODO: review this. because casting is not preferred
+        writeln("WindowAdapterRc.size() called");
         return cast(PhysicalSize) slint_windowrc_size(&inner);
     }
 
@@ -230,8 +236,8 @@ public:
     // }
 
     /// \private
-    ref const(WindowAdapterRcOpaque) handle() const {
-        return inner;
+    const(WindowAdapterRcOpaque)* handle() const {
+        return &inner;
     }
 
 private:
@@ -262,6 +268,7 @@ public:
     /// strong reference.
     void show() {
         assert_main_thread();
+        writeln("inner.show()");
         inner.show();
     }
     /// Hides the window, so that it is not visible anymore. The additional strong
@@ -362,34 +369,34 @@ public:
     /// Returns if the window is currently fullscreen
     bool is_fullscreen() const {
         assert_main_thread();
-        return slint_windowrc_is_fullscreen(&inner.handle());
+        return slint_windowrc_is_fullscreen(inner.handle());
     }
     /// Set or unset the window to display fullscreen.
     void set_fullscreen(bool fullscreen) {
         assert_main_thread();
-        slint_windowrc_set_fullscreen(&inner.handle(), fullscreen);
+        slint_windowrc_set_fullscreen(inner.handle(), fullscreen);
     }
 
     /// Returns if the window is currently maximized
     bool is_maximized() const {
         assert_main_thread();
-        return slint_windowrc_is_maximized(&inner.handle());
+        return slint_windowrc_is_maximized(inner.handle());
     }
     /// Maximize or unmaximize the window.
     void set_maximized(bool maximized) {
         assert_main_thread();
-        slint_windowrc_set_maximized(&inner.handle(), maximized);
+        slint_windowrc_set_maximized(inner.handle(), maximized);
     }
 
     /// Returns if the window is currently minimized
     bool is_minimized() const {
         assert_main_thread();
-        return slint_windowrc_is_minimized(&inner.handle());
+        return slint_windowrc_is_minimized(inner.handle());
     }
     /// Minimize or unminimze the window.
     void set_minimized(bool minimized) {
         assert_main_thread();
-        slint_windowrc_set_minimized(&inner.handle(), minimized);
+        slint_windowrc_set_minimized(inner.handle(), minimized);
     }
 
     /// Dispatch a key press event to the scene.
@@ -399,7 +406,7 @@ public:
     /// The \a text is the unicode representation of the key.
     void dispatch_key_press_event(const SharedString text) {
         assert_main_thread();
-        slint_windowrc_dispatch_key_event(&inner.handle(), KeyEventType.KeyPressed, &text, false);
+        slint_windowrc_dispatch_key_event(inner.handle(), KeyEventType.KeyPressed, &text, false);
     }
 
     /// Dispatch an auto-repeated key press event to the scene.
@@ -409,7 +416,7 @@ public:
     /// The \a text is the unicode representation of the key.
     void dispatch_key_press_repeat_event(const SharedString text) {
         assert_main_thread();
-        slint_windowrc_dispatch_key_event(&inner.handle(), KeyEventType.KeyPressed, &text, true);
+        slint_windowrc_dispatch_key_event(inner.handle(), KeyEventType.KeyPressed, &text, true);
     }
 
     /// Dispatch a key release event to the scene.
@@ -419,7 +426,7 @@ public:
     /// The \a text is the unicode representation of the key.
     void dispatch_key_release_event(const SharedString text) {
         assert_main_thread();
-        slint_windowrc_dispatch_key_event(&inner.handle(), KeyEventType.KeyReleased, &text, false);
+        slint_windowrc_dispatch_key_event(inner.handle(), KeyEventType.KeyReleased, &text, false);
     }
 
     /// Dispatches a pointer or mouse press event to the scene.
@@ -489,7 +496,7 @@ public:
         WindowEvent event;
         event.resized = WindowEvent.Resized_Body(WindowEvent.Tag.Resized,
                 LogicalSize(s.width, s.height));
-        slint_windowrc_dispatch_event(&inner.handle(), &event);
+        slint_windowrc_dispatch_event(inner.handle(), &event);
     }
 
     /// The window's scale factor has changed. This can happen for example when the display's
@@ -502,7 +509,7 @@ public:
         WindowEvent event;
         event.scale_factor_changed = WindowEvent.ScaleFactorChanged_Body(
                 WindowEvent.Tag.ScaleFactorChanged, factor);
-        slint_windowrc_dispatch_event(&inner.handle(), &event);
+        slint_windowrc_dispatch_event(inner.handle(), &event);
     }
 
     /// The Window was activated or de-activated.
@@ -514,7 +521,7 @@ public:
         WindowEvent event;
         event.window_active_changed = WindowEvent.WindowActiveChanged_Body(
                 WindowEvent.Tag.WindowActiveChanged, active);
-        slint_windowrc_dispatch_event(&inner.handle(), &event);
+        slint_windowrc_dispatch_event(inner.handle(), &event);
     }
 
     /// The user requested to close the window.
@@ -527,13 +534,13 @@ public:
     void dispatch_close_requested_event() {
         assert_main_thread();
         WindowEvent event = WindowEvent(WindowEvent.Tag.CloseRequested);
-        slint_windowrc_dispatch_event(&inner.handle(), &event);
+        slint_windowrc_dispatch_event(inner.handle(), &event);
     }
 
     /// Returns true if there is an animation currently active on any property in the Window.
     bool has_active_animations() const {
         assert_main_thread();
-        return slint_windowrc_has_active_animations(&inner.handle());
+        return slint_windowrc_has_active_animations(inner.handle());
     }
 
     /// Takes a snapshot of the window contents and returns it as RGBA8 encoded pixel buffer.
@@ -543,7 +550,7 @@ public:
     // Nullable!(SharedPixelBuffer!(Rgba8Pixel)) take_snapshot() const
     // {
     //     SharedPixelBuffer!(Rgba8Pixel) result;
-    //     if (slint_windowrc_take_snapshot(&inner.handle(), &result.m_data,
+    //     if (slint_windowrc_take_snapshot(inner.handle(), &result.m_data,
     //                                                        &result.m_width, &result.m_height)) {
     //         return result;
     //     } else {

@@ -8,7 +8,7 @@ import std.stdio;
 
 import core.atomic;
 import core.lifetime;
-import core.stdc.stdint : uint8_t;
+import core.stdc.stdint : uint8_t, uintptr_t;
 
 import slint.internal;
 
@@ -24,6 +24,13 @@ extern (C) {
     struct Layout {
         size_t size;
         size_t align_;
+    }
+
+    struct AllowPin;
+
+    struct VOffset(Base, T, Flag = void) {
+        const T* vtable;
+        uintptr_t offset;
     }
 
     struct VRcInner(VTable, X) {

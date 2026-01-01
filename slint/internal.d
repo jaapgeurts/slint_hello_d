@@ -869,7 +869,8 @@ extern (C) {
             const ItemRc* focus_item, bool set_focus, FocusReason reason);
 
     /// Associates the window with the given component.
-    void slint_windowrc_set_component(const WindowAdapterRcOpaque* handle, const ItemTreeRc component);
+    void slint_windowrc_set_component(const WindowAdapterRcOpaque* handle,
+            const ItemTreeRc* component);
 
     // TODO: enable later
     // /// Show a popup and return its ID. The returned ID will always be non-zero.
