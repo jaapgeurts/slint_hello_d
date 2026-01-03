@@ -2,31 +2,40 @@
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
 module slint.properties;
 
+import core.memory;
 import core.stdc.stdint : uintptr_t, intptr_t, uint8_t, int32_t, uint32_t, uint64_t;
 
 import slint.properties_internal;
 import slint.internal;
 import slint.color;
 
-void slint_property_set_animated_binding_helper(const PropertyHandleOpaque* handle, void function(void*, int*) binding,
-        void* user_data, void function(void*) drop_user_data, const PropertyAnimation* animation_data,
-        PropertyAnimation function(void*, uint64_t*) transition_data) {
+template PropertyCallback(T) {
+    alias PropertyCallback = extern (C) void function(void*, T*);
+}
+
+alias DropUserDataCallback = extern (C) void function(void*);
+alias TransitionDataCallback = extern (C) PropertyAnimation function(void*, uint64_t*);
+
+void slint_property_set_animated_binding_helper(const PropertyHandleOpaque* handle,
+        PropertyCallback!int binding, void* user_data,
+        DropUserDataCallback drop_user_data, const PropertyAnimation* animation_data,
+        TransitionDataCallback transition_data) {
     slint_property_set_animated_binding_int(handle, binding, user_data,
             drop_user_data, animation_data, transition_data);
 }
 
 void slint_property_set_animated_binding_helper(const PropertyHandleOpaque* handle,
-        void function(void*, float*) binding,
-        void* user_data, void function(void*) drop_user_data, const PropertyAnimation* animation_data,
-        PropertyAnimation function(void*, uint64_t*) transition_data) {
+        PropertyCallback!float binding, void* user_data,
+        DropUserDataCallback drop_user_data, const PropertyAnimation* animation_data,
+        TransitionDataCallback transition_data) {
     slint_property_set_animated_binding_float(handle, binding, user_data,
             drop_user_data, animation_data, transition_data);
 }
 
 void slint_property_set_animated_binding_helper(const PropertyHandleOpaque* handle,
-        void function(void*, Color*) binding,
-        void* user_data, void function(void*) drop_user_data, const PropertyAnimation* animation_data,
-        PropertyAnimation function(void*, uint64_t*) transition_data) {
+        PropertyCallback!Color binding, void* user_data,
+        DropUserDataCallback drop_user_data, const PropertyAnimation* animation_data,
+        TransitionDataCallback transition_data) {
     slint_property_set_animated_binding_color(handle, binding, user_data,
             drop_user_data, animation_data, transition_data);
 }
@@ -41,9 +50,11 @@ void slint_property_set_animated_binding_helper(const PropertyHandleOpaque* hand
 //     slint_property_set_animated_binding_brush(
 //             handle, binding, user_data, drop_user_data, animation_data, transition_data);
 // }
+// TODO: think about how properties must be instantiated since default constructors are not allowed in D
+extern (C) struct Property(T) {
 
-struct Property(T) {
-    this() {
+    // TODO: think aout a good name
+    void initialize() {
         slint_property_init(&inner);
     }
 
@@ -53,29 +64,32 @@ struct Property(T) {
     // Property(const Property &) = delete;
     // Property(Property &&) = delete;
     // Property &operator=(const Property &) = delete;
-    this(const T value) {
-        this.value = value;
-        slint_property_init(&inner);
-    }
+    // this(const T value) {
+    //     this.value = value;
+    //     slint_property_init(&inner);
+    // }
 
     /* Should it be implicit?
     void operator=(const T &value) {
         set(value);
     }*/
 
-    void set(const T value) const {
+    // TODO: review const for both set() and get()
+    void set(T value) {
+
         if ((inner._0 & 0b10) == 0b10 || this.value != value) {
             this.value = value;
             slint_property_set_changed(&inner, &this.value);
         }
     }
 
-    const(T) get() const {
-        slint_property_update(&inner, &value);
+    T get() {
+        slint_property_update(&inner, cast(void*)&this.value);
         return value;
     }
 
     void set_binding(F)(F binding) const {
+        writeln("Property.set_binding() called");
         slint_property_set_binding(&inner, (void* user_data, void* value) {
             *cast(T*)(value) = (*cast(F*)(user_data))();
         }, new F(binding), (void* user_data) { delete cast(F*)(user_data); }, nullptr, nullptr);
@@ -83,15 +97,15 @@ struct Property(T) {
 
     // TODO: check if PropertyAnimation == struct or class.
     // that affects the function call slint_property_set_animated_value_int 3rd arg
-    void set_animated_value(const T value, const PropertyAnimation animation_data) const {
+    void set_animated_value(const T new_value, const PropertyAnimation animation_data) const {
         static if (is(T == int32_t)) {
-            slint_property_set_animated_value_int(&inner, value, new_value, animation_data);
+            slint_property_set_animated_value_int(&inner, value, new_value, &animation_data);
         }
         else static if (is(T == float)) {
-            slint_property_set_animated_value_float(&inner, value, new_value, animation_data);
+            slint_property_set_animated_value_float(&inner, value, new_value, &animation_data);
         }
         else static if (is(T == Color)) {
-            slint_property_set_animated_value_color(&inner, value, new_value, animation_data);
+            slint_property_set_animated_value_color(&inner, value, new_value, &animation_data);
         }
     }
 
@@ -127,43 +141,58 @@ struct Property(T) {
         slint_property_mark_dirty(&inner);
     }
 
-    static void link_two_way(const Property!(T)* p1, const Property!(T)* p2) {
+    static void link_two_way(Property!(T)* p1, Property!(T)* p2) {
+
         auto value = p2.get();
         PropertyHandleOpaque handle;
         if ((p2.inner._0 & 0b10) == 0b10) {
             // TODO: Review this:
             // std::swap(handle, const_cast<Property<T> *>(p2)->inner);
             auto t = handle;
-            handle = cast(Property!(T)*)(p2).inner;
-            cast(Property!(T)*)(p2).inner = t;
+            handle = (cast(Property!(T)*) p2).inner;
+            (cast(Property!(T)*) p2).inner = t;
         }
         // TODO: check conversion
         // auto common_property = std::make_shared<Property!(T)>(handle, std::move(value));
         // TODO: add common_property as root to the GC to prevent deletion.
-        shared auto common_property = new Property!(T)(handle, value);
+        // TODO: declare this property shared
+        auto common_property = new Property!T(handle, value);
+        // TODO: must this be a struct?
         struct TwoWayBinding {
-            shared Property!(T) common_property;
+            // TODO: declare this property shared *
+            Property!(T)* common_property;
         }
 
-        auto del_fn = (void* user_data) {
-            delete cast(TwoWayBinding*)(user_data);
-        };
-        auto call_fn = (void* user_data, void* value) {
-            *cast(T*)(value) = cast(TwoWayBinding*)(user_data).common_property.get();
-        };
-        auto intercept_fn = (void* user_data, const void* value) {
-            cast(TwoWayBinding*)(user_data).common_property.set(*cast(const T*)(value));
+        extern (C) void call_fn(void* user_data, void* value) {
+            *(cast(T*) value) = (cast(TwoWayBinding*) user_data).common_property.get();
+        }
+
+        extern (C) void del_fn(void* user_data) {
+            GC.removeRoot(user_data);
+            // (cast(TwoWayBinding*) user_data).destroy();
+        }
+
+        extern (C) bool intercept_fn(void* user_data, const void* value) {
+            // TODO: consider bringing back 'const' here
+            // (cast(TwoWayBinding*) user_data).common_property.set(*cast(const T*)(value));
+            // (cast(TwoWayBinding*) user_data).common_property.set(*cast(T*)(value));
             return true;
-        };
-        auto intercept_binding_fn = (void* user_data, void* value) {
-            slint_property_set_binding_internal(&cast(TwoWayBinding*)(user_data)
+        }
+
+        extern (C) bool intercept_binding_fn(void* user_data, void* value) {
+            slint_property_set_binding_internal(&(cast(TwoWayBinding*) user_data)
                     .common_property.inner, value);
             return true;
-        };
-        slint_property_set_binding(&p1.inner, call_fn,
-                new TwoWayBinding(common_property), del_fn, intercept_fn, intercept_binding_fn);
-        slint_property_set_binding(&p2.inner, call_fn,
-                new TwoWayBinding(common_property), del_fn, intercept_fn, intercept_binding_fn);
+        }
+
+        auto prop1 = new TwoWayBinding(common_property);
+        GC.addRoot(prop1);
+        slint_property_set_binding(&p1.inner, &call_fn, prop1, &del_fn,
+                &intercept_fn, &intercept_binding_fn);
+        auto prop2 = new TwoWayBinding(common_property);
+        GC.addRoot(prop2);
+        slint_property_set_binding(&p2.inner, &call_fn, prop2, &del_fn,
+                &intercept_fn, &intercept_binding_fn);
     }
 
     /// Internal (private) constructor used by link_two_way

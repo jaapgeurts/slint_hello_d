@@ -12,6 +12,8 @@ import slint.platform_internal;
 import slint.slint;
 import slint.string_internal;
 import slint.string;
+import slint.enums_internal;
+import slint.properties;
 
 // import slint.platform;
 import slint.window;
@@ -20,6 +22,15 @@ class SharedGlobals {
 public:
     Nullable!Window m_window;
     ItemTreeWeak root_weak;
+    /+
+    auto window () const -> slint::Window&{
+        auto self = const_cast<SharedGlobals *>(this);
+        if (!self->m_window.has_value()) {
+           auto &window = self->m_window.emplace(slint::private_api::WindowAdapterRc());
+           window.window_handle().set_component(self->root_weak);
+        }
+        return *self->m_window;
+    }+/
     Window window() {
         if (this.m_window.isNull()) {
             this.m_window = Nullable!Window(new Window(new WindowAdapterRc()));
@@ -33,7 +44,7 @@ public:
     // }
 }
 
-struct MainWindow {
+extern (C) struct MainWindow {
     ItemTreeWeak self_weak;
     SharedGlobals m_globals = new SharedGlobals();
     SharedGlobals globals;
@@ -41,9 +52,20 @@ struct MainWindow {
     uint32_t tree_index_of_first_child;
     uint32_t tree_index;
 
+    Property!LayoutInfo root_1_layoutinfo_h;
+    Property!LayoutInfo root_1_layoutinfo_v;
+
+    WindowItem root_1;
+    SimpleText text_2;
+
     static ComponentHandle!(MainWindow) create() {
         auto self_rc = VRc!(ItemTreeVTable, MainWindow).make();
         auto self = cast(MainWindow)(self_rc.data());
+
+        // TODO: think about how to solve this
+        self.root_1.initialize();
+        self.text_2.initialize();
+
         self.self_weak = VWeak!(ItemTreeVTable, MainWindow)(self_rc).into_dyn();
         slint_ensure_backend();
         self.globals = self.m_globals;
@@ -51,13 +73,13 @@ struct MainWindow {
         auto dyn = self_rc.into_dyn();
         writeln("Before register_item_tree()");
         register_item_tree(dyn, self.globals.m_window);
-        // self.init_(self.globals, self.self_weak, 0, 1);
+        self.init_(self.globals, self.self_weak, 0, 1);
         self.user_init();
         // self.window();
         return new ComponentHandle!MainWindow(self_rc);
     }
 
-    static const ItemTreeVTable static_vtable = ItemTreeVTable(null, &get_item_ref, null, null,
+    __gshared const ItemTreeVTable static_vtable = ItemTreeVTable(null, &get_item_ref, null, null,
             &get_item_tree, null, null, null, null, null, null, null, null,
             null, null, null, null, null);
     // ItemTreeVTable( visit_children, get_item_ref, get_subtree_range, get_subtree, get_item_tree, parent_node, embed_component, subtree_index, layout_info, item_geometry, accessible_role, accessible_string_property, accessibility_action, supported_accessibility_actions, element_infos, window_adapter, drop_in_place<MainWindow>, dealloc );
@@ -75,6 +97,14 @@ struct MainWindow {
         self.globals = globals;
         this.tree_index_of_first_child = tree_index_of_first_child;
         self.tree_index = tree_index;
+
+        root_1_layoutinfo_h.initialize();
+        root_1_layoutinfo_v.initialize();
+
+        self.root_1.title.initialize();
+
+        // self.root_1.title.set(SharedString("Slint Window"));
+
         // self.root_1.background.set_binding(() {
         //     auto self = this;
         //     return self.globals.global_FluentPalette_4.background.get();
@@ -171,29 +201,31 @@ struct MainWindow {
 
         static ItemRef get_item_ref(ItemTreeRef component, uint32_t index) {
             writeln("callback: get_item_ref");
-            return slint.item_tree.get_item_ref(component,
-                    get_item_tree(component), item_array(), index);
+            auto it = get_item_tree(component);
+            return slint.item_tree.get_item_ref(component, it, item_array(), index);
         }
 
         static const(ItemArray) item_array() {
             ItemArrayEntry[] items = [
                 // TODO: fix later
-                // {
-                //     SLINT_GET_ITEM_VTABLE(WindowItemVTable), MainWindow.root_1.offsetof
-                // },
-                // {
-                //     SLINT_GET_ITEM_VTABLE(SimpleTextVTable), MainWindow.text_2.offsetof
-                // }
+                {&WindowItemVTable, MainWindow.root_1.offsetof},
+                {&SimpleTextVTable, MainWindow.text_2.offsetof}
             ];
             return make_slice(items.ptr, items.length);
+        }
+
+        LayoutInfo layout_info(Orientation o) {
+            return o == Orientation.Horizontal
+                ? this.root_1_layoutinfo_h.get() : this.root_1_layoutinfo_v.get();
         }
     }
 
     static Slice!(ItemTreeNode) item_tree() {
-        static const ItemTreeNode[] children = [];
-        // [
-        //     make_item_node(1, 1, 0, 0, false), make_item_node(0, 2, 0, 1, true)
-        // ];
+        writeln("callback: item_tree()");
+        static const ItemTreeNode[] children = [
+            make_item_node(1, 1, 0, 0, false),
+            make_item_node(0, 2, 0, 1, true) // make_item_node(8, 3, 7, 0, false), make_item_node(0, 2, 0, 1, true)
+        ];
         // TODO: consider removing these slices.
         return make_slice(children.ptr, children.length);
     }
@@ -214,3 +246,14 @@ struct MainWindow {
         return m_globals.window();
     }
 }
+
+// TODO: cleanup here
+// pragma(mangle, "slint::private_api::WindowItemVTable") extern __gshared const(ItemVTable) WindowItemVTable;
+// pragma(mangle, "slint::private_api::SimpleTextVTable") extern __gshared const(ItemVTable) SimpleTextVTable;
+
+// TODO: consider moving this to slint.slint;
+pragma(mangle, "WindowItemVTable") extern __gshared const(ItemVTable) WindowItemVTable;
+pragma(mangle, "SimpleTextVTable") extern __gshared const(ItemVTable) SimpleTextVTable;
+
+// extern (C++,slint.private_api) __gshared const(ItemVTable) WindowItemVTable;
+// extern (C++,slint.private_api) __gshared const(ItemVTable) SimpleTextVTable;

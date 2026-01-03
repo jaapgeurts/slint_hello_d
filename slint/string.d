@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
 module slint.string;
 
+import std.stdio;
 import std.string;
 
 import slint.string_internal;
@@ -19,33 +20,59 @@ import slint.string_internal;
 ///
 /// Under the hood the string data is UTF-8 encoded and it is always terminated with a null
 /// character.
-class SharedString {
+
+// TODO: convert this class to a struct because it interops with rust.
+extern (C) struct SharedString {
+    // TODO: enable later
     /// Creates an empty default constructed string.
-    this() {
-        slint_shared_string_from_bytes(this, "".ptr, 0);
-    }
+    // this() {
+    //     slint_shared_string_from_bytes(this, "".ptr, 0);
+    // }
     /// Creates a new SharedString from the string view \a s. The underlying string data
     /// is copied.
     this(string s) {
-        auto t = s.toStringz();
-        slint_shared_string_from_bytes(this, t.ptr, s.length);
+
+        // auto t = s.toStringz();
+        writefln("SharedString.inner before: %s", this.inner);
+        // TODO: change the signature to accept a void* (and make it an opaque pointer)
+        slint_shared_string_from_bytes(cast(SharedString*)&this.inner, s.ptr, s.length);
+        // slint_shared_string_from_bytes(&this, "".ptr, 0);
+        writefln("SharedString.inner  after: %s", this.inner);
     }
+
+    void initialize() {
+        slint_shared_string_from_bytes(cast(SharedString*)&this.inner, "DLang".ptr, 5);
+    }
+
     /// Creates a new SharedString from \a other.
-    this(const SharedString other) {
-        slint_shared_string_clone(this, other);
+    this(inout SharedString other) {
+        slint_shared_string_clone(cast(SharedString*)&this.inner,
+                cast(SharedString*)&other.inner);
     }
+
     /// Destroys this SharedString and frees the memory if this is the last instance
     /// referencing it.
     ~this() {
-        slint_shared_string_drop(this);
+        // TODO: review
+        // 1. maybe the struct was never initialized
+        // because D doesn't support default constructors for structs
+        // 2. The struct may also not be dropped, since it was cloned.
+
+        // if (inner !is null)
+        // slint_shared_string_drop(cast(SharedString*)&this.inner);
+        writeln("SharedString.dtor called");
     }
     /// Assigns \a other to this string and returns a reference to this string.
-    // SharedString &operator=(const SharedString &other)
-    // {
-    //     slint_shared_string_drop(this);
-    //     slint_shared_string_clone(this, &other);
-    //     return *this;
-    // }
+    void opAssign(SharedString other) {
+        writefln("SharedString.inner assign before: %s", this.inner);
+        // maybe the struct was never initialized
+        // because D doesn't support default constructors for structs
+        if (this.inner !is null)
+            slint_shared_string_drop(cast(SharedString*)&this.inner);
+        slint_shared_string_clone(cast(SharedString*)&this.inner,
+                cast(SharedString*)&other.inner);
+        writefln("SharedString.inner assign after: %s", this.inner);
+    }
     // /// Assigns the string view \a s to this string and returns a reference to this string.
     // /// The underlying string data is copied.  It is assumed that the string is UTF-8 encoded.
     // SharedString &operator=(std::string_view s)
@@ -69,13 +96,13 @@ class SharedString {
     /// Provides a view to the string data. The returned view is only valid as long as at
     /// least this SharedString exists.
     // operator std::string_view() const { return slint_shared_string_bytes(this); }
-    string asString() {
-        return fromStringz(slint_shared_string_bytes(this));
+    string asString() const {
+        return cast(string) fromStringz(slint_shared_string_bytes(cast(SharedString*)&this.inner));
     }
     /// Provides a raw pointer to the string data. The returned pointer is only valid as long as at
     /// least this SharedString exists.
-    immutable(char)* data() const {
-        return slint_shared_string_bytes(this);
+    const(ubyte)* data() const {
+        return cast(const(ubyte)*) slint_shared_string_bytes(cast(SharedString*)&this.inner);
     }
     /// Size of the string, in bytes. This excludes the terminating null character.
     size_t size() const {
@@ -84,14 +111,14 @@ class SharedString {
 
     /// Returns a pointer to the first character. It is only safe to dereference the pointer if the
     /// string contains at least one character.
-    immutable(char)* begin() const {
+    const(ubyte)* begin() const {
         return data();
     }
     /// Returns a point past the last character of the string. It is not safe to dereference the
     /// pointer, but it is suitable for comparison.
-    immutable(char)* end() const {
+    const(ubyte)* end() const {
         // TODO: check if $-1 is correct or must be $-2 (because of \0)
-        return &asString()[$ - 1];
+        return cast(const(ubyte)*)&asString()[$ - 1];
     }
 
     /// \return true if the string contains no characters; false otherwise.
@@ -117,7 +144,7 @@ class SharedString {
 
     /// Reset to an empty string
     void clear() {
-        slint_shared_string_from_bytes(this, "".ptr, 0);
+        slint_shared_string_from_bytes(cast(SharedString*)&this.inner, "".ptr, 0);
         //*this = std::string_view("", 0);
     }
 
@@ -143,7 +170,7 @@ class SharedString {
     /// \endcode
     SharedString to_lowercase() const {
         auto out_ = SharedString();
-        slint_shared_string_to_lowercase(&out_, this);
+        slint_shared_string_to_lowercase(&out_, cast(SharedString*)&this.inner);
         return out_;
     }
 
@@ -156,7 +183,7 @@ class SharedString {
     /// \endcode
     SharedString to_uppercase() const {
         auto out_ = SharedString();
-        slint_shared_string_to_uppercase(&out_, this);
+        slint_shared_string_to_uppercase(&out_, cast(SharedString*)&this.inner);
         return out_;
     }
 
@@ -221,7 +248,7 @@ class SharedString {
 private:
     /// Use SharedString::from_number
     this(double n) {
-        slint_shared_string_from_number(this, n);
+        slint_shared_string_from_number(cast(SharedString*)&this.inner, n);
     }
 
     void* inner; // opaque
@@ -229,8 +256,8 @@ private:
 
 // TODO: convert this and other code to native D slices,
 Slice!(T) make_slice(T)(const T* ptr, size_t len) {
-    return Slice!(T)( // Rust uses a NonNull, so even empty slices shouldn't use nullptr
-            ptr != null ? cast(T*)(ptr) : cast(T*)(T.sizeof), len);
+    // Rust uses a NonNull, so even empty slices shouldn't use nullptr
+    return Slice!(T)(ptr != null ? cast(T*) ptr : cast(T*) T.sizeof, len);
 }
 
 // template<typename T, size_t Extent>

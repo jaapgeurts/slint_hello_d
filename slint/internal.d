@@ -1,17 +1,19 @@
 module slint.internal;
 
-import slint.vtable;
-import slint.string_internal;
-import slint.enums;
-import slint.enums_internal;
-import slint.properties_internal;
-import slint.window;
-import slint.string;
+import std.traits;
+
 import slint.color;
-import slint.properties;
-import slint.point;
-import slint.size;
+import slint.enums_internal;
+import slint.enums;
 import slint.events_internal;
+import slint.point;
+import slint.properties_internal;
+import slint.properties;
+import slint.size;
+import slint.string_internal;
+import slint.string;
+import slint.vtable;
+import slint.window;
 
 import core.stdc.stdint : uintptr_t, intptr_t, uint8_t, int32_t, uint32_t, uint64_t;
 
@@ -117,68 +119,68 @@ struct Option(T = void);
 
 alias VisitChildrenResult = uint64_t;
 
-struct ItemRc {
-    VRc!(ItemTreeVTable) item_tree;
-    uint32_t index;
-}
-
-/// The constraint that applies to an item
-struct LayoutInfo {
-    /// The maximum size for the item.
-    float max;
-    /// The maximum size in percentage of the parent (value between 0 and 100).
-    float max_percent;
-    /// The minimum size for this item.
-    float min;
-    /// The minimum size in percentage of the parent (value between 0 and 100).
-    float min_percent;
-    /// the preferred size
-    float preferred;
-    /// the  stretch factor
-    float stretch;
-    LayoutInfo merge(const ref LayoutInfo other) const;
-    // friend inline LayoutInfo operator+(const LayoutInfo &a, const LayoutInfo &b) { return a.merge(b); }
-    // friend bool operator==(const LayoutInfo&, const LayoutInfo&) = default;
-}
-
-/// Items are the nodes in the render tree.
-struct ItemVTable {
-    /// This function is called by the run-time after the memory for the item
-    /// has been allocated and initialized. It will be called before any user specified
-    /// bindings are set.
-    void function(Pin!(VRef!(ItemVTable)), const ItemRc* my_item) init_;
-    /// offset in bytes from the *const ItemImpl.
-    /// isize::MAX  means None
-    uintptr_t cached_rendering_data_offset;
-    /// We would need max/min/preferred size, and all layout info
-    LayoutInfo function(Pin!(VRef!(ItemVTable)), Orientation orientation,
-            const WindowAdapterRc* window_adapter, const ItemRc* self_rc) layout_info;
-    /// Event handler for mouse and touch event. This function is called before being called on children.
-    /// Then, depending on the return value, it is called for the children, and their children, then
-    /// [`Self::input_event`] is called on the children, and finally [`Self::input_event`] is called
-    /// on this item again.
-    // TODO: enable later
-    // InputEventFilterResult function(Pin!(VRef!(ItemVTable)), const MouseEvent*,
-    //         const WindowAdapterRc* window_adapter, const ItemRc* self_rc) input_event_filter_before_children;
-    // /// Handle input event for mouse and touch event
-    // InputEventResult function(Pin!(VRef!(ItemVTable)), const MouseEvent*,
-    //         const WindowAdapterRc* window_adapter, const ItemRc* self_rc) input_event;
-    // FocusEventResult function(Pin!(VRef!(ItemVTable)), const FocusEvent*,
-    //         const WindowAdapterRc* window_adapter, const ItemRc* self_rc) focus_event;
-    // /// Called on the parents of the focused item, allowing for global shortcuts and similar
-    // /// overrides of the default actions.
-    // KeyEventResult function(Pin!(VRef!(ItemVTable)), const KeyEvent*,
-    //         const WindowAdapterRc* window_adapter, const ItemRc* self_rc) capture_key_event;
-    // KeyEventResult function(Pin!(VRef!(ItemVTable)), const KeyEvent*,
-    //         const WindowAdapterRc* window_adapter, const ItemRc* self_rc) key_event;
-    // RenderingResult function(Pin!(VRef!(ItemVTable)),
-    //         ItemRendererRef* backend, const ItemRc* self_rc, LogicalSize size) render;
-    // LogicalRect function(Pin!(VRef!(ItemVTable)),
-    //         const WindowAdapterRc* window_adapter, const ItemRc* self_rc, LogicalRect geometry) bounding_rect;
-    // bool function(Pin!(VRef!(ItemVTable))) clips_children;
-}
-
 extern (C) {
+
+    struct ItemRc {
+        VRc!(ItemTreeVTable) item_tree;
+        uint32_t index;
+    }
+
+    /// The constraint that applies to an item
+    struct LayoutInfo {
+        /// The maximum size for the item.
+        float max;
+        /// The maximum size in percentage of the parent (value between 0 and 100).
+        float max_percent;
+        /// The minimum size for this item.
+        float min;
+        /// The minimum size in percentage of the parent (value between 0 and 100).
+        float min_percent;
+        /// the preferred size
+        float preferred;
+        /// the  stretch factor
+        float stretch;
+        LayoutInfo merge(const ref LayoutInfo other) const;
+        // friend inline LayoutInfo operator+(const LayoutInfo &a, const LayoutInfo &b) { return a.merge(b); }
+        // friend bool operator==(const LayoutInfo&, const LayoutInfo&) = default;
+    }
+
+    /// Items are the nodes in the render tree.
+    struct ItemVTable {
+        /// This function is called by the run-time after the memory for the item
+        /// has been allocated and initialized. It will be called before any user specified
+        /// bindings are set.
+        void function(Pin!(VRef!(ItemVTable)), const ItemRc* my_item) init_;
+        /// offset in bytes from the *const ItemImpl.
+        /// isize::MAX  means None
+        uintptr_t cached_rendering_data_offset;
+        /// We would need max/min/preferred size, and all layout info
+        LayoutInfo function(Pin!(VRef!(ItemVTable)), Orientation orientation,
+                const WindowAdapterRc* window_adapter, const ItemRc* self_rc) layout_info;
+        /// Event handler for mouse and touch event. This function is called before being called on children.
+        /// Then, depending on the return value, it is called for the children, and their children, then
+        /// [`Self::input_event`] is called on the children, and finally [`Self::input_event`] is called
+        /// on this item again.
+        // TODO: enable later
+        // InputEventFilterResult function(Pin!(VRef!(ItemVTable)), const MouseEvent*,
+        //         const WindowAdapterRc* window_adapter, const ItemRc* self_rc) input_event_filter_before_children;
+        // /// Handle input event for mouse and touch event
+        // InputEventResult function(Pin!(VRef!(ItemVTable)), const MouseEvent*,
+        //         const WindowAdapterRc* window_adapter, const ItemRc* self_rc) input_event;
+        // FocusEventResult function(Pin!(VRef!(ItemVTable)), const FocusEvent*,
+        //         const WindowAdapterRc* window_adapter, const ItemRc* self_rc) focus_event;
+        // /// Called on the parents of the focused item, allowing for global shortcuts and similar
+        // /// overrides of the default actions.
+        // KeyEventResult function(Pin!(VRef!(ItemVTable)), const KeyEvent*,
+        //         const WindowAdapterRc* window_adapter, const ItemRc* self_rc) capture_key_event;
+        // KeyEventResult function(Pin!(VRef!(ItemVTable)), const KeyEvent*,
+        //         const WindowAdapterRc* window_adapter, const ItemRc* self_rc) key_event;
+        // RenderingResult function(Pin!(VRef!(ItemVTable)),
+        //         ItemRendererRef* backend, const ItemRc* self_rc, LogicalSize size) render;
+        // LogicalRect function(Pin!(VRef!(ItemVTable)),
+        //         const WindowAdapterRc* window_adapter, const ItemRc* self_rc, LogicalRect geometry) bounding_rect;
+        // bool function(Pin!(VRef!(ItemVTable))) clips_children;
+    }
 
     struct ItemVisitorVTable {
         /// Called for each child of the visited item
@@ -268,236 +270,296 @@ extern (C) {
         const void* _1;
     }
 
-}
+    /// The item tree is an array of ItemTreeNode representing a static tree of items
+    /// within a ItemTree.
+    union ItemTreeNode {
+        enum Tag : uint8_t {
+            /// Static item
+            Item,
+            /// A placeholder for many instance of item in their own ItemTree which
+            /// are instantiated according to a model.
+            DynamicTree,
+        }
 
-/// The item tree is an array of ItemTreeNode representing a static tree of items
-/// within a ItemTree.
-union ItemTreeNode {
-    enum Tag : uint8_t {
-        /// Static item
-        Item,
-        /// A placeholder for many instance of item in their own ItemTree which
-        /// are instantiated according to a model.
-        DynamicTree,
+        struct Item_Body {
+            Tag tag;
+            /// True when the item has accessibility properties attached
+            bool is_accessible;
+            /// number of children
+            uint32_t children_count;
+            /// index of the first children within the item tree
+            uint32_t children_index;
+            /// The index of the parent item (not valid for the root)
+            uint32_t parent_index;
+            /// The index in the extra item_array
+            uint32_t item_array_index;
+        }
+
+        struct DynamicTree_Body {
+            Tag tag;
+            /// the index which is passed in the visit_dynamic callback.
+            uint32_t index;
+            /// The index of the parent item (not valid for the root)
+            uint32_t parent_index;
+        }
+
+        struct {
+            Tag tag;
+        }
+
+        Item_Body item;
+        DynamicTree_Body dynamic_tree;
+        this(Item_Body x) {
+            item = x;
+        }
+
+        this(DynamicTree_Body x) {
+            dynamic_tree = x;
+        }
     }
 
-    struct Item_Body {
-        Tag tag;
-        /// True when the item has accessibility properties attached
-        bool is_accessible;
-        /// number of children
-        uint32_t children_count;
-        /// index of the first children within the item tree
-        uint32_t children_index;
-        /// The index of the parent item (not valid for the root)
-        uint32_t parent_index;
-        /// The index in the extra item_array
-        uint32_t item_array_index;
-    }
+    /// Type alias to the commonly used VWeak<ItemTreeVTable, Dyn>>
+    alias ItemTreeWeak = VWeak!(ItemTreeVTable, Dyn);
 
-    struct DynamicTree_Body {
-        Tag tag;
-        /// the index which is passed in the visit_dynamic callback.
+    /// A Weak reference to an item that can be constructed from an ItemRc.
+    struct ItemWeak {
+        ItemTreeWeak item_tree;
         uint32_t index;
-        /// The index of the parent item (not valid for the root)
-        uint32_t parent_index;
     }
 
-    struct {
-        Tag tag;
+    /// Alias for `vtable::VRef<ItemTreeVTable>` which represent a pointer to a `dyn ItemTree` with
+    /// the associated vtable
+    alias ItemTreeRef = VRef!(ItemTreeVTable);
+
+    /// Type alias to the commonly used `Pin<VRef<ItemTreeVTable>>>`
+    alias ItemTreeRefPin = Pin!(ItemTreeRef);
+
+    /// The implementation of the `PropertyAnimation` element
+    struct PropertyAnimation {
+        int32_t delay;
+        int32_t duration;
+        float iteration_count;
+        AnimationDirection direction;
+        // TODO: Enable later
+        // EasingCurve easing;
     }
 
-    Item_Body item;
-    DynamicTree_Body dynamic_tree;
-    this(Item_Body x) {
-        item = x;
+    /// 2D Size in integer coordinates
+    alias IntSize = Size2D!(uint32_t);
+
+    union WindowEvent {
+        enum Tag : uint32_t {
+            /// A pointer was pressed.
+            PointerPressed,
+            /// A pointer was released.
+            PointerReleased,
+            /// The position of the pointer has changed.
+            PointerMoved,
+            /// The wheel button of a mouse was rotated to initiate scrolling.
+            PointerScrolled,
+            /// The pointer exited the window.
+            PointerExited,
+            /// A key was pressed.
+            KeyPressed,
+            /// A key press was auto-repeated.
+            KeyPressRepeated,
+            /// A key was released.
+            KeyReleased,
+            /// The window's scale factor has changed. This can happen for example when the display's resolution
+            /// changes, the user selects a new scale factor in the system settings, or the window is moved to a
+            /// different screen.
+            /// Platform implementations should dispatch this event also right after the initial window creation,
+            /// to set the initial scale factor the windowing system provided for the window.
+            ScaleFactorChanged,
+            /// The window was resized.
+            ///
+            /// The backend must send this event to ensure that the `width` and `height` property of the root Window
+            /// element are properly set.
+            Resized,
+            /// The user requested to close the window.
+            ///
+            /// The backend should send this event when the user tries to close the window,for example by pressing the close button.
+            ///
+            /// This will have the effect of invoking the callback set in [`Window::on_close_requested()`](`crate::api::Window::on_close_requested()`)
+            /// and then hiding the window depending on the return value of the callback.
+            CloseRequested,
+            /// The Window was activated or de-activated.
+            ///
+            /// The backend should dispatch this event with true when the window gains focus
+            /// and false when the window loses focus.
+            WindowActiveChanged,
+        }
+
+        struct PointerPressed_Body {
+            Tag tag;
+            LogicalPosition position;
+            /// The button that was pressed.
+            PointerEventButton button;
+        }
+
+        struct PointerReleased_Body {
+            Tag tag;
+            LogicalPosition position;
+            /// The button that was released.
+            PointerEventButton button;
+        }
+
+        struct PointerMoved_Body {
+            Tag tag;
+            LogicalPosition position;
+        }
+
+        struct PointerScrolled_Body {
+            Tag tag;
+            LogicalPosition position;
+            /// The amount of logical pixels to scroll in the horizontal direction.
+            float delta_x;
+            /// The amount of logical pixels to scroll in the vertical direction.
+            float delta_y;
+        }
+
+        struct KeyPressed_Body {
+            Tag tag;
+            /// The unicode representation of the key pressed.
+            ///
+            /// # Example
+            /// A specific key can be mapped to a unicode by using the [`Key`] enum
+            /// ```rust
+            /// let _ = slint::platform::WindowEvent::KeyPressed { text: slint::platform::Key::Shift.into() };
+            /// ```
+            SharedString text;
+        }
+
+        struct KeyPressRepeated_Body {
+            Tag tag;
+            /// The unicode representation of the key pressed.
+            ///
+            /// # Example
+            /// A specific key can be mapped to a unicode by using the [`Key`] enum
+            /// ```rust
+            /// let _ = slint::platform::WindowEvent::KeyPressRepeated { text: slint::platform::Key::Shift.into() };
+            /// ```
+            SharedString text;
+        }
+
+        struct KeyReleased_Body {
+            Tag tag;
+            /// The unicode representation of the key released.
+            ///
+            /// # Example
+            /// A specific key can be mapped to a unicode by using the [`Key`] enum
+            /// ```rust
+            /// let _ = slint::platform::WindowEvent::KeyReleased { text: slint::platform::Key::Shift.into() };
+            /// ```
+            SharedString text;
+        }
+
+        struct ScaleFactorChanged_Body {
+            Tag tag;
+            /// The window system provided scale factor to map logical pixels to physical pixels.
+            float scale_factor;
+        }
+
+        struct Resized_Body {
+            Tag tag;
+            /// The new logical size of the window
+            LogicalSize size;
+        }
+
+        struct WindowActiveChanged_Body {
+            Tag tag;
+            bool _0;
+        }
+
+        struct {
+            Tag tag;
+        }
+
+        PointerPressed_Body pointer_pressed;
+        PointerReleased_Body pointer_released;
+        PointerMoved_Body pointer_moved;
+        PointerScrolled_Body pointer_scrolled;
+        KeyPressed_Body key_pressed;
+        KeyPressRepeated_Body key_press_repeated;
+        KeyReleased_Body key_released;
+        ScaleFactorChanged_Body scale_factor_changed;
+        Resized_Body resized;
+        WindowActiveChanged_Body window_active_changed;
+        /* Some members of the WindowEvent enum have destructors (with SharedString), but thankfully we don't use these so we can have an empty constructor */
+
     }
 
-    this(DynamicTree_Body x) {
-        dynamic_tree = x;
-    }
-}
-
-/// Type alias to the commonly used VWeak<ItemTreeVTable, Dyn>>
-alias ItemTreeWeak = VWeak!(ItemTreeVTable, Dyn);
-
-/// A Weak reference to an item that can be constructed from an ItemRc.
-struct ItemWeak {
-    ItemTreeWeak item_tree;
-    uint32_t index;
-}
-
-/// Alias for `vtable::VRef<ItemTreeVTable>` which represent a pointer to a `dyn ItemTree` with
-/// the associated vtable
-alias ItemTreeRef = VRef!(ItemTreeVTable);
-
-/// Type alias to the commonly used `Pin<VRef<ItemTreeVTable>>>`
-alias ItemTreeRefPin = Pin!(ItemTreeRef);
-
-/// The implementation of the `PropertyAnimation` element
-struct PropertyAnimation {
-    int32_t delay;
-    int32_t duration;
-    float iteration_count;
-    AnimationDirection direction;
-    // TODO: Enable later
-    // EasingCurve easing;
-}
-
-/// 2D Size in integer coordinates
-alias IntSize = Size2D!(uint32_t);
-
-union WindowEvent {
-    enum Tag : uint32_t {
-        /// A pointer was pressed.
-        PointerPressed,
-        /// A pointer was released.
-        PointerReleased,
-        /// The position of the pointer has changed.
-        PointerMoved,
-        /// The wheel button of a mouse was rotated to initiate scrolling.
-        PointerScrolled,
-        /// The pointer exited the window.
-        PointerExited,
-        /// A key was pressed.
-        KeyPressed,
-        /// A key press was auto-repeated.
-        KeyPressRepeated,
-        /// A key was released.
-        KeyReleased,
-        /// The window's scale factor has changed. This can happen for example when the display's resolution
-        /// changes, the user selects a new scale factor in the system settings, or the window is moved to a
-        /// different screen.
-        /// Platform implementations should dispatch this event also right after the initial window creation,
-        /// to set the initial scale factor the windowing system provided for the window.
-        ScaleFactorChanged,
-        /// The window was resized.
-        ///
-        /// The backend must send this event to ensure that the `width` and `height` property of the root Window
-        /// element are properly set.
-        Resized,
-        /// The user requested to close the window.
-        ///
-        /// The backend should send this event when the user tries to close the window,for example by pressing the close button.
-        ///
-        /// This will have the effect of invoking the callback set in [`Window::on_close_requested()`](`crate::api::Window::on_close_requested()`)
-        /// and then hiding the window depending on the return value of the callback.
-        CloseRequested,
-        /// The Window was activated or de-activated.
-        ///
-        /// The backend should dispatch this event with true when the window gains focus
-        /// and false when the window loses focus.
-        WindowActiveChanged,
+    /// Expand Rect so that cbindgen can see it. ( is in fact euclid::default::Rect<f32>)
+    struct Rect {
+        float x;
+        float y;
+        float width;
+        float height;
     }
 
-    struct PointerPressed_Body {
-        Tag tag;
-        LogicalPosition position;
-        /// The button that was pressed.
-        PointerEventButton button;
+    template isProperty(T) {
+        enum isProperty = is(T == Property!U, U);
     }
 
-    struct PointerReleased_Body {
-        Tag tag;
-        LogicalPosition position;
-        /// The button that was released.
-        PointerEventButton button;
+    /// The implementation of the `Text` element
+    struct SimpleText {
+        Property!LogicalLength width;
+        Property!LogicalLength height;
+        Property!SharedString text;
+        Property!LogicalLength font_size;
+        Property!int32_t font_weight;
+        // TODO: replace with next line
+        Property!ulong color;
+        // Property!Brush color;
+        Property!TextHorizontalAlignment horizontal_alignment;
+        Property!TextVerticalAlignment vertical_alignment;
+        // CachedRenderingData cached_rendering_data;
+
+        void initialize() {
+            static foreach (member; FieldNameTuple!(typeof(this))) {
+                static if (isProperty!(typeof(__traits(getMember, typeof(this), member)))) {
+                    __traits(getMember, typeof(this), member).initialize();
+                }
+            }
+        }
     }
+    /// The implementation of the `Window` element
 
-    struct PointerMoved_Body {
-        Tag tag;
-        LogicalPosition position;
+    struct WindowItem {
+
+        Property!LogicalLength width;
+        Property!LogicalLength height;
+        // Property!Brush background; // TODO: remove next line
+        Property!(void*) background;
+        Property!SharedString title;
+        Property!bool no_frame;
+        Property!LogicalLength resize_border_width;
+        Property!bool always_on_top;
+        Property!bool full_screen;
+        // Property!Image icon; // TODO: keep this, remove next line
+        Property!ulong icon;
+        Property!SharedString default_font_family;
+        Property!LogicalLength default_font_size;
+        Property!int32_t default_font_weight;
+        // CachedRenderingData cached_rendering_data;
+
+        void initialize() {
+            static foreach (member; FieldNameTuple!(typeof(this))) {
+                static if (isProperty!(typeof(__traits(getMember, typeof(this), member)))) {
+                    __traits(getMember, typeof(this), member).initialize();
+                }
+            }
+        }
+
+        // static WindowItem make() {
+        //     static foreach (member; FieldNameTuple!(typeof(this))) {
+        //         static if (is(typeof(__traits(getMember, typeof(this), member)) == Property!T, T)) {
+        //             __traits(getMember, typeof(this), member) = typeof(__traits(getMember,
+        //                     typeof(this), member)).initialize();
+        //         }
+        //     }
+        // }
     }
-
-    struct PointerScrolled_Body {
-        Tag tag;
-        LogicalPosition position;
-        /// The amount of logical pixels to scroll in the horizontal direction.
-        float delta_x;
-        /// The amount of logical pixels to scroll in the vertical direction.
-        float delta_y;
-    }
-
-    struct KeyPressed_Body {
-        Tag tag;
-        /// The unicode representation of the key pressed.
-        ///
-        /// # Example
-        /// A specific key can be mapped to a unicode by using the [`Key`] enum
-        /// ```rust
-        /// let _ = slint::platform::WindowEvent::KeyPressed { text: slint::platform::Key::Shift.into() };
-        /// ```
-        SharedString text;
-    }
-
-    struct KeyPressRepeated_Body {
-        Tag tag;
-        /// The unicode representation of the key pressed.
-        ///
-        /// # Example
-        /// A specific key can be mapped to a unicode by using the [`Key`] enum
-        /// ```rust
-        /// let _ = slint::platform::WindowEvent::KeyPressRepeated { text: slint::platform::Key::Shift.into() };
-        /// ```
-        SharedString text;
-    }
-
-    struct KeyReleased_Body {
-        Tag tag;
-        /// The unicode representation of the key released.
-        ///
-        /// # Example
-        /// A specific key can be mapped to a unicode by using the [`Key`] enum
-        /// ```rust
-        /// let _ = slint::platform::WindowEvent::KeyReleased { text: slint::platform::Key::Shift.into() };
-        /// ```
-        SharedString text;
-    }
-
-    struct ScaleFactorChanged_Body {
-        Tag tag;
-        /// The window system provided scale factor to map logical pixels to physical pixels.
-        float scale_factor;
-    }
-
-    struct Resized_Body {
-        Tag tag;
-        /// The new logical size of the window
-        LogicalSize size;
-    }
-
-    struct WindowActiveChanged_Body {
-        Tag tag;
-        bool _0;
-    }
-
-    struct {
-        Tag tag;
-    }
-
-    PointerPressed_Body pointer_pressed;
-    PointerReleased_Body pointer_released;
-    PointerMoved_Body pointer_moved;
-    PointerScrolled_Body pointer_scrolled;
-    KeyPressed_Body key_pressed;
-    KeyPressRepeated_Body key_press_repeated;
-    KeyReleased_Body key_released;
-    ScaleFactorChanged_Body scale_factor_changed;
-    Resized_Body resized;
-    WindowActiveChanged_Body window_active_changed;
-    /* Some members of the WindowEvent enum have destructors (with SharedString), but thankfully we don't use these so we can have an empty constructor */
-
-}
-
-/// Expand Rect so that cbindgen can see it. ( is in fact euclid::default::Rect<f32>)
-struct Rect {
-    float x;
-    float y;
-    float width;
-    float height;
-}
-
-extern (C) {
 
     /// Initialize the callback.
     /// slint_callback_drop must be called.
@@ -706,7 +768,7 @@ extern (C) {
     //         void* user_data, void function(void*) drop_user_data, const PropertyAnimation* animation_data,
     //         PropertyAnimation function(void* user_data, uint64_t* start_instant) transition_data);
 
-    /// Internal function to set up a state binding on a Property<StateInfo>.
+    /// Internal function to set up a state binding on a Property!StateInfo.
     void slint_property_set_state_binding(const PropertyHandleOpaque* handle,
             int32_t function(void*) binding, void* user_data, void function(void*) drop_user_data);
 

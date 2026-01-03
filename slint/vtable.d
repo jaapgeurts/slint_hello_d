@@ -12,15 +12,16 @@ import core.stdc.stdint : uint8_t, uintptr_t;
 
 import slint.internal;
 
-struct VRefMut(T) {
-    const T* vtable;
-    void* instance;
-}
-
-alias VRef(T) = VRefMut!T;
-alias Pin(T) = T;
-
 extern (C) {
+
+    struct VRefMut(T) {
+        const T* vtable;
+        void* instance;
+    }
+
+    alias VRef(T) = VRefMut!T;
+    alias Pin(T) = T;
+
     struct Layout {
         size_t size;
         size_t align_;

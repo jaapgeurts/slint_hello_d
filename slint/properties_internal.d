@@ -10,53 +10,55 @@ import slint.properties;
 alias PropertyHandle = uintptr_t;
 
 /// Has the same layout as PropertyHandle
-struct PropertyHandleOpaque {
-    PropertyHandle _0;
+extern (C) {
+    struct PropertyHandleOpaque {
+        PropertyHandle _0;
 
-    // bool operator==(const PropertyHandleOpaque& other) const {
-    //     return _0 == other._0;
-    // }
-    // bool operator!=(const PropertyHandleOpaque& other) const {
-    //     return _0 != other._0;
-    // }
+        // bool operator==(const PropertyHandleOpaque& other) const {
+        //     return _0 == other._0;
+        // }
+        // bool operator!=(const PropertyHandleOpaque& other) const {
+        //     return _0 != other._0;
+        // }
+    }
+
+    /// Opaque type representing the PropertyTracker
+    struct PropertyTrackerOpaque {
+        uintptr_t dependencies;
+        uintptr_t dep_nodes;
+        uintptr_t vtable;
+        bool dirty;
+
+        // bool operator==(const PropertyTrackerOpaque& other) const {
+        //     return dependencies == other.dependencies &&
+        //            dep_nodes == other.dep_nodes &&
+        //            vtable == other.vtable &&
+        //            dirty == other.dirty;
+        // }
+        // bool operator!=(const PropertyTrackerOpaque& other) const {
+        //     return dependencies != other.dependencies ||
+        //            dep_nodes != other.dep_nodes ||
+        //            vtable != other.vtable ||
+        //            dirty != other.dirty;
+        // }
+    }
+
+    /// Has the same layout as Callback<_>
+    struct CallbackOpaque {
+        const void* _0;
+        const void* _1;
+
+        // bool operator==(const CallbackOpaque& other) const {
+        //     return _0 == other._0 &&
+        //            _1 == other._1;
+        // }
+        // bool operator!=(const CallbackOpaque& other) const {
+        //     return _0 != other._0 ||
+        //            _1 != other._1;
+        // }
+    }
 }
-
-/// Opaque type representing the PropertyTracker
-struct PropertyTrackerOpaque {
-    uintptr_t dependencies;
-    uintptr_t dep_nodes;
-    uintptr_t vtable;
-    bool dirty;
-
-    // bool operator==(const PropertyTrackerOpaque& other) const {
-    //     return dependencies == other.dependencies &&
-    //            dep_nodes == other.dep_nodes &&
-    //            vtable == other.vtable &&
-    //            dirty == other.dirty;
-    // }
-    // bool operator!=(const PropertyTrackerOpaque& other) const {
-    //     return dependencies != other.dependencies ||
-    //            dep_nodes != other.dep_nodes ||
-    //            vtable != other.vtable ||
-    //            dirty != other.dirty;
-    // }
-}
-
-/// Has the same layout as Callback<_>
-struct CallbackOpaque {
-    const void* _0;
-    const void* _1;
-
-    // bool operator==(const CallbackOpaque& other) const {
-    //     return _0 == other._0 &&
-    //            _1 == other._1;
-    // }
-    // bool operator!=(const CallbackOpaque& other) const {
-    //     return _0 != other._0 ||
-    //            _1 != other._1;
-    // }
-}
-
+/+
 extern (C) {
 
     /// Initialize the first pointer of the Property. Does not initialize the content.
@@ -196,4 +198,4 @@ extern (C) {
     /// Destroy callback
     void slint_callback_drop(CallbackOpaque* handle);
 
-} // extern "C"
+} // extern "C"+/

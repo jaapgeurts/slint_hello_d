@@ -27,8 +27,8 @@ public:
     }
 
     this() {
-        slint_windowrc_init(&inner);
         writeln("Create window, WindowAdapterRc.this(), slint_windowrc_init(): ", inner);
+        slint_windowrc_init(&inner);
     }
 
     ~this() {
