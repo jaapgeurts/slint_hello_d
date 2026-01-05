@@ -23,6 +23,7 @@ import slint.string_internal;
 
 // TODO: convert this class to a struct because it interops with rust.
 extern (C) struct SharedString {
+
     // TODO: enable later
     /// Creates an empty default constructed string.
     // this() {
@@ -41,6 +42,7 @@ extern (C) struct SharedString {
     }
 
     void initialize() {
+        writefln("SharedString.initialize() called: this=%s", &this);
         slint_shared_string_from_bytes(cast(SharedString*)&this.inner, "DLang".ptr, 5);
     }
 
@@ -67,8 +69,8 @@ extern (C) struct SharedString {
         writefln("SharedString.inner assign before: %s", this.inner);
         // maybe the struct was never initialized
         // because D doesn't support default constructors for structs
-        if (this.inner !is null)
-            slint_shared_string_drop(cast(SharedString*)&this.inner);
+        // if (this.inner !is null)
+        //     slint_shared_string_drop(cast(SharedString*)&this.inner);
         slint_shared_string_clone(cast(SharedString*)&this.inner,
                 cast(SharedString*)&other.inner);
         writefln("SharedString.inner assign after: %s", this.inner);

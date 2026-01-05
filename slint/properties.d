@@ -55,6 +55,15 @@ extern (C) struct Property(T) {
 
     // TODO: think aout a good name
     void initialize() {
+        import slint.string;
+        import std.stdio;
+
+        this.inner._0 = 0;
+        writeln("Property.initialize()");
+        static if (is(T == SharedString)) {
+            writeln("\tinit SharedString");
+            value.initialize();
+        }
         slint_property_init(&inner);
     }
 
@@ -211,6 +220,9 @@ extern (C) struct Property(T) {
 
 private:
     PropertyHandleOpaque inner;
+    // TODO: alignment is wrong here for some reason. change to align(8). investigate why it's wrong.
+    // It used to be correct with the release zip 1.14.1 from github
+    ubyte[2] a;
     T value;
     // template<typename F>
     // friend void set_state_binding(const Property<StateInfo> &property, F binding);
@@ -308,6 +320,11 @@ private:
     PropertyTrackerOpaque inner;
 }
 
+// TODO: this could probably just be removed and use a void* in the class below
+struct ChangeTrackerInner {
+    void* inner;
+}
+
 // TODO: review this
 class ChangeTracker {
     this() {
@@ -342,5 +359,5 @@ class ChangeTracker {
     }
 
 private:
-    ChangeTracker inner;
+    ChangeTrackerInner inner;
 }

@@ -7,6 +7,7 @@ import slint.string;
 extern (C) {
 
     struct Slice(T) {
+
         /// Invariant, this is a valid slice of len `len`
         T* ptr;
         uintptr_t len;

@@ -8,6 +8,7 @@ import slint.timer;
 import slint.string_internal;
 
 alias ItemRef = VRef!(ItemVTable);
+alias ItemVisitorRefMut = VRefMut!(ItemVisitorVTable);
 alias ItemArrayEntry = VOffset!(uint8_t, ItemVTable, AllowPin);
 alias ItemArray = Slice!(ItemArrayEntry);
 

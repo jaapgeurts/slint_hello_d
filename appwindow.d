@@ -3,7 +3,7 @@ import std.typecons;
 import std.algorithm.comparison;
 import std.stdio;
 
-import core.stdc.stdint : uint32_t;
+import core.stdc.stdint : uint32_t, uint64_t, intptr_t;
 
 import slint.internal;
 import slint.item_tree;
@@ -36,6 +36,7 @@ public:
             this.m_window = Nullable!Window(new Window(new WindowAdapterRc()));
             m_window.get().window_handle().set_component(this.root_weak);
         }
+        writeln("Window created");
         return this.m_window.get;
     }
     // std::shared_ptr<FluentPalette_4> global_FluentPalette_4 = std::make_shared<FluentPalette_4>(this);
@@ -45,8 +46,8 @@ public:
 }
 
 extern (C) struct MainWindow {
-    ItemTreeWeak self_weak;
     SharedGlobals m_globals = new SharedGlobals();
+    ItemTreeWeak self_weak;
     SharedGlobals globals;
 
     uint32_t tree_index_of_first_child;
@@ -60,28 +61,31 @@ extern (C) struct MainWindow {
 
     static ComponentHandle!(MainWindow) create() {
         auto self_rc = VRc!(ItemTreeVTable, MainWindow).make();
-        auto self = cast(MainWindow)(self_rc.data());
-
-        // TODO: think about how to solve this
-        self.root_1.initialize();
-        self.text_2.initialize();
+        writeln("Title_rc: ", self_rc.inner.data.root_1.title.get.asString);
+        auto self = self_rc.data();
+        writeln("    self: ", self.root_1.title.get.asString);
 
         self.self_weak = VWeak!(ItemTreeVTable, MainWindow)(self_rc).into_dyn();
+
         slint_ensure_backend();
         self.globals = self.m_globals;
         self.m_globals.root_weak = self.self_weak;
+
         auto dyn = self_rc.into_dyn();
         writeln("Before register_item_tree()");
+
         register_item_tree(dyn, self.globals.m_window);
         self.init_(self.globals, self.self_weak, 0, 1);
         self.user_init();
-        // self.window();
+        self.window();
+        // TODO: run should not be called from here. Remove
+        self.run();
         return new ComponentHandle!MainWindow(self_rc);
     }
 
-    __gshared const ItemTreeVTable static_vtable = ItemTreeVTable(null, &get_item_ref, null, null,
-            &get_item_tree, null, null, null, null, null, null, null, null,
-            null, null, null, null, null);
+    __gshared const ItemTreeVTable static_vtable = ItemTreeVTable(&visit_children, &get_item_ref, null, null,
+            &get_item_tree, null, null, null, &layout_info, null, null, null,
+            null, null, null, null, null, null);
     // ItemTreeVTable( visit_children, get_item_ref, get_subtree_range, get_subtree, get_item_tree, parent_node, embed_component, subtree_index, layout_info, item_geometry, accessible_role, accessible_string_property, accessibility_action, supported_accessibility_actions, element_infos, window_adapter, drop_in_place<MainWindow>, dealloc );
 
     void run() {
@@ -97,11 +101,6 @@ extern (C) struct MainWindow {
         self.globals = globals;
         this.tree_index_of_first_child = tree_index_of_first_child;
         self.tree_index = tree_index;
-
-        root_1_layoutinfo_h.initialize();
-        root_1_layoutinfo_v.initialize();
-
-        self.root_1.title.initialize();
 
         // self.root_1.title.set(SharedString("Slint Window"));
 
@@ -195,12 +194,12 @@ extern (C) struct MainWindow {
     // TODO: these original definition methods were static.
     extern (C) {
         static Slice!(ItemTreeNode) get_item_tree(ItemTreeRef) {
-            writeln("callback: get_item_tree()");
+            // writeln("callback: get_item_tree()");
             return item_tree();
         }
 
         static ItemRef get_item_ref(ItemTreeRef component, uint32_t index) {
-            writeln("callback: get_item_ref");
+            // writeln("callback: get_item_ref");
             auto it = get_item_tree(component);
             return slint.item_tree.get_item_ref(component, it, item_array(), index);
         }
@@ -214,20 +213,44 @@ extern (C) struct MainWindow {
             return make_slice(items.ptr, items.length);
         }
 
-        LayoutInfo layout_info(Orientation o) {
-            return o == Orientation.Horizontal
-                ? this.root_1_layoutinfo_h.get() : this.root_1_layoutinfo_v.get();
+        static LayoutInfo layout_info(ItemTreeRef component, Orientation o) {
+            return (*cast(MainWindow*) component.instance).layout_info(o);
         }
-    }
 
+        static uint64_t visit_children(ItemTreeRef component, intptr_t index,
+                TraversalOrder order, ItemVisitorRefMut visitor) {
+            alias dyn_visit_fn = extern (C) uint64_t function(const void* base,
+                    TraversalOrder order, ItemVisitorRefMut visitor, uint32_t dyn_index);
+            dyn_visit_fn dyn_visit = (const void* base, TraversalOrder order,
+                    ItemVisitorRefMut visitor, uint32_t dyn_index) {
+                auto self = *cast(const MainWindow*)(base);
+                import core.stdc.stdlib : abort;
+
+                abort();
+            };
+
+            // auto self_rc = (*(cast(MainWindow*) component.instance)).self_weak.lock().get.into_dyn();
+
+            // return slint_visit_item_tree(&self_rc, get_item_tree(component),
+            // index, order, visitor, dyn_visit);
+            return 0;
+        }
+
+    }
+    // Node make_item_node(uint32_t child_count, uint32_t child_index,
+    //                     uint32_t parent_index, uint32_t item_array_index, bool is_accessible)
     static Slice!(ItemTreeNode) item_tree() {
-        writeln("callback: item_tree()");
+        // writeln("callback: item_tree()");
         static const ItemTreeNode[] children = [
-            make_item_node(1, 1, 0, 0, false),
-            make_item_node(0, 2, 0, 1, true) // make_item_node(8, 3, 7, 0, false), make_item_node(0, 2, 0, 1, true)
+            make_item_node(1, 1, 0, 0, false), make_item_node(0, 2, 0, 1, false)
         ];
         // TODO: consider removing these slices.
         return make_slice(children.ptr, children.length);
+    }
+
+    LayoutInfo layout_info(Orientation o) {
+        return o == Orientation.Horizontal
+            ? this.root_1_layoutinfo_h.get() : this.root_1_layoutinfo_v.get();
     }
 
     void user_init() {
@@ -235,7 +258,10 @@ extern (C) struct MainWindow {
     }
 
     void show() {
-        window().show();
+        writefln("show() called: %s", &this);
+        auto win = window();
+        writeln("value before show: ", this.root_1.title.get.asString);
+        win.show();
     }
 
     void hide() {

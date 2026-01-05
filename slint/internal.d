@@ -497,10 +497,6 @@ extern (C) {
         float height;
     }
 
-    template isProperty(T) {
-        enum isProperty = is(T == Property!U, U);
-    }
-
     /// The implementation of the `Text` element
     struct SimpleText {
         Property!LogicalLength width;
@@ -515,13 +511,6 @@ extern (C) {
         Property!TextVerticalAlignment vertical_alignment;
         // CachedRenderingData cached_rendering_data;
 
-        void initialize() {
-            static foreach (member; FieldNameTuple!(typeof(this))) {
-                static if (isProperty!(typeof(__traits(getMember, typeof(this), member)))) {
-                    __traits(getMember, typeof(this), member).initialize();
-                }
-            }
-        }
     }
     /// The implementation of the `Window` element
 
@@ -530,7 +519,7 @@ extern (C) {
         Property!LogicalLength width;
         Property!LogicalLength height;
         // Property!Brush background; // TODO: remove next line
-        Property!(void*) background;
+        Property!(int) background;
         Property!SharedString title;
         Property!bool no_frame;
         Property!LogicalLength resize_border_width;
@@ -543,22 +532,6 @@ extern (C) {
         Property!int32_t default_font_weight;
         // CachedRenderingData cached_rendering_data;
 
-        void initialize() {
-            static foreach (member; FieldNameTuple!(typeof(this))) {
-                static if (isProperty!(typeof(__traits(getMember, typeof(this), member)))) {
-                    __traits(getMember, typeof(this), member).initialize();
-                }
-            }
-        }
-
-        // static WindowItem make() {
-        //     static foreach (member; FieldNameTuple!(typeof(this))) {
-        //         static if (is(typeof(__traits(getMember, typeof(this), member)) == Property!T, T)) {
-        //             __traits(getMember, typeof(this), member) = typeof(__traits(getMember,
-        //                     typeof(this), member)).initialize();
-        //         }
-        //     }
-        // }
     }
 
     /// Initialize the callback.
@@ -605,12 +578,12 @@ extern (C) {
     ///
     /// Safety: Assume a correct implementation of the item_tree array
 
+    VisitChildrenResult slint_visit_item_tree(const ItemTreeRc* item_tree,
+            Slice!(ItemTreeNode) item_tree_array, intptr_t index,
+            TraversalOrder order, VRefMut!(ItemVisitorVTable) visitor,
+            VisitChildrenResult function(const void* base, TraversalOrder order,
+                VRefMut!(ItemVisitorVTable) visitor, uint32_t dyn_index) visit_dynamic);
     // TODO: enable later
-    // VisitChildrenResult slint_visit_item_tree(const ItemTreeRc item_tree,
-    //         Slice!(ItemTreeNode) item_tree_array, intptr_t index,
-    //         TraversalOrder order, VRefMut!(ItemVisitorVTable) visitor,
-    //         VisitChildrenResult function(const void* base, TraversalOrder order,
-    //             VRefMut!(ItemVisitorVTable) visitor, uint32_t dyn_index) visit_dynamic);
     // void slint_contextmenu_close(Pin!(const ContextMenu*) s, const WindowAdapterRcOpaque* window_adapter,
     //         const VRc!(ItemTreeVTable)* self_component, uint32_t self_index);
     //
@@ -794,13 +767,13 @@ extern (C) {
     void slint_property_tracker_drop(PropertyTrackerOpaque* handle);
 
     /// Construct a ChangeTracker
-    void slint_change_tracker_construct(ChangeTracker* ct);
+    void slint_change_tracker_construct(ChangeTrackerInner* ct);
 
     /// Drop a ChangeTracker
-    void slint_change_tracker_drop(ChangeTracker* ct);
+    void slint_change_tracker_drop(ChangeTrackerInner* ct);
 
     /// initialize the change tracker
-    void slint_change_tracker_init(const ChangeTracker* ct, void* user_data,
+    void slint_change_tracker_init(const ChangeTrackerInner* ct, void* user_data,
             void function(void* user_data) drop_user_data,
             bool function(void* user_data) eval_fn, void function(void* user_data) notify_fn);
 

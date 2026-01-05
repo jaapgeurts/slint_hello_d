@@ -12,6 +12,12 @@ import core.stdc.stdint : uint8_t, uintptr_t;
 
 import slint.internal;
 
+template isProperty(T) {
+    import slint.properties;
+
+    enum isProperty = is(T == Property!U, U);
+}
+
 extern (C) {
 
     struct VRefMut(T) {
@@ -36,7 +42,7 @@ extern (C) {
 
     struct VRcInner(VTable, X) {
 
-    private:
+    public: // todo: this was private
         static if (__traits(hasMember, X, "static_vtable")) {
             const VTable* vtable = &X.static_vtable;
         }
@@ -45,8 +51,8 @@ extern (C) {
         }
         // TODO: review if we must use the 'shared' keyword for strong_ref and weak_ref
         // and make operation on it atomic
-        int strong_ref = 1;
-        int weak_ref = 1;
+        int strong_ref = 10;
+        int weak_ref = 10;
         // __traits(fieldOffset, VRcInner, data);
         ushort data_offset = VRcInner!(VTable, X).data.offsetof;
         union {
@@ -71,16 +77,18 @@ extern (C) {
 
         this(VRcInner!(VTable, X)* inner) {
             this.inner = inner;
+
         }
 
-        // this(const ref VRc!(VTable, X) other) {
-        //     inner = other;
-        //     other.string_ref++;
+        // this(VRc!(VTable, X) other) {
+        //     writeln("VRc copy constructor called");
+        //     this.inner = other.inner;
+        //     // other.string_ref++;
         // }
 
     public:
          ~this() {
-            inner.strong_ref--;
+            // inner.strong_ref--;
             // if (--inner.strong_ref == 0) {
             //     // consider that inner.data is probably a pointer
             //     Layout layout = inner.vtable.drop_in_place(VRefMut!VTable(inner.vtable,
@@ -95,17 +103,19 @@ extern (C) {
             // }
         }
 
-        // this(VRcInner!(VTable, X)* other) {
-        //     this.inner = other.inner;
-        //     inner.strong_ref++;
-        // }
-
-        // void opAssign(VRc other) {
-        //     if (inner == other.inner)
-        //         return;
+        // this(ref VRcInner!(VTable, X) other) {
+        //     writeln("VRc.copy constructoror called");
         //     this.inner = other.inner;
         //     this.inner.strong_ref++;
         // }
+
+        void opAssign(ref VRc!(VTable, X) other) {
+            writeln("VRc.opAssign() called");
+            if (inner == other.inner)
+                return;
+            this.inner = other.inner;
+            this.inner.strong_ref++;
+        }
         /// Construct a new VRc holding an X.
         ///
         /// The type X must have a static member `static_vtable` of type VTable
@@ -139,6 +149,30 @@ extern (C) {
 
             // inner_l.data = new X(args);
             emplace!(X)(&inner_l.data, args);
+
+            // TODO: review this solution
+            // call initialize on all properties
+
+            void initialize(U)(U* data) {
+                static foreach (member; FieldNameTuple!U) {
+                    { // this extra brace introduces a new scope to avoid
+                        // duplicate naming (such as alias MT)
+                        writeln("Inspect member: ", member);
+                        alias MT = typeof(__traits(getMember, data, member));
+                        static if (isProperty!(MT)) {
+                            writeln("\tinit property: ", member);
+                            __traits(getMember, data, member).initialize();
+                        }
+                        // recursively call structs
+                        else static if (is(MT == struct)) {
+                            writeln("Recursing into: ", member);
+                            initialize!(MT)(&__traits(getMember, data, member));
+                        }
+                    }
+                }
+            }
+
+            initialize!(X)(cast(X*)&inner_l.data);
 
             return VRc!(VTable, X)(inner_l);
         }
