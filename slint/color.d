@@ -30,10 +30,10 @@ struct RgbaColor(T) {
             alpha = color.alpha();
         }
         static if (is(T == float)) {
-            red = cast(float)(color.red()) / 255.f;
-            green = cast(float)(color.green()) / 255.f;
-            blue = cast(float)(color.blue()) / 255.f;
-            alpha = cast(float)(color.alpha()) / 255.f;
+            red = cast(float)(color.red()) / 255f;
+            green = cast(float)(color.green()) / 255f;
+            blue = cast(float)(color.blue()) / 255f;
+            alpha = cast(float)(color.alpha()) / 255f;
         }
     }
 
@@ -69,15 +69,15 @@ public:
     }
     /// Constructs a new color from the given RgbaColor<float> \a col.
     this(const RgbaColor!(float) col) {
-        inner.red = uint8_t(col.red * 255);
-        inner.green = uint8_t(col.green * 255);
-        inner.blue = uint8_t(col.blue * 255);
-        inner.alpha = uint8_t(col.alpha * 255);
+        inner.red = cast(uint8_t)(col.red * 255);
+        inner.green = cast(uint8_t)(col.green * 255);
+        inner.blue = cast(uint8_t)(col.blue * 255);
+        inner.alpha = cast(uint8_t)(col.alpha * 255);
     }
 
     /// Construct a color from an integer encoded as `0xAARRGGBB`
     static Color from_argb_encoded(uint32_t argb_encoded) {
-        Color col;
+        Color col = new Color();
         col.inner.red = (argb_encoded >> 16) & 0xff;
         col.inner.green = (argb_encoded >> 8) & 0xff;
         col.inner.blue = argb_encoded & 0xff;
@@ -93,7 +93,7 @@ public:
 
     /// Construct a color from the alpha, red, green and blue color channel parameters.
     static Color from_argb_uint8(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue) {
-        Color col;
+        Color col = new Color();
         col.inner.alpha = alpha;
         col.inner.red = red;
         col.inner.green = green;
@@ -109,11 +109,11 @@ public:
 
     /// Construct a color from the alpha, red, green and blue color channel parameters.
     static Color from_argb_float(float alpha, float red, float green, float blue) {
-        Color col;
-        col.inner.alpha = uint8_t(alpha * 255);
-        col.inner.red = uint8_t(red * 255);
-        col.inner.green = uint8_t(green * 255);
-        col.inner.blue = uint8_t(blue * 255);
+        Color col = new Color();
+        col.inner.alpha = cast(uint8_t)(alpha * 255);
+        col.inner.red = cast(uint8_t)(red * 255);
+        col.inner.green = cast(uint8_t)(green * 255);
+        col.inner.blue = cast(uint8_t)(blue * 255);
         return col;
     }
 
@@ -138,7 +138,7 @@ public:
     /// and 1.
     static Color from_hsva(float h, float s, float v, float a) {
         Color ret;
-        ret.inner = cbindgen_private.types.slint_color_from_hsva(h, s, v, a);
+        ret.inner = slint_color_from_hsva(h, s, v, a);
         return ret;
     }
 
@@ -146,8 +146,7 @@ public:
     /// @returns a new HsvaColor.
     HsvaColor to_hsva() const {
         HsvaColor hsv;
-        cbindgen_private.types.slint_color_to_hsva(&inner, &hsv.hue,
-                &hsv.saturation, &hsv.value, &hsv.alpha);
+        slint_color_to_hsva(&inner, &hsv.hue, &hsv.saturation, &hsv.value, &hsv.alpha);
         return hsv;
     }
 
@@ -179,7 +178,7 @@ public:
     /// calling `brighter(-0.5)` will return a color that's 50% darker.
     Color brighter(float factor) const {
         Color result;
-        cbindgen_private.types.slint_color_brighter(&inner, factor, &result.inner);
+        slint_color_brighter(&inner, factor, &result.inner);
         return result;
     }
 
@@ -190,7 +189,7 @@ public:
     /// So for example `darker(0.3)` will decrease the brightness by 30%.
     Color darker(float factor) const {
         Color result;
-        cbindgen_private.types.slint_color_darker(&inner, factor, &result.inner);
+        slint_color_darker(&inner, factor, &result.inner);
         return result;
     }
 
@@ -199,7 +198,7 @@ public:
     /// The transparency is obtained by multiplying the alpha channel by `(1 - factor)`.
     Color transparentize(float factor) const {
         Color result;
-        cbindgen_private.types.slint_color_transparentize(&inner, factor, &result.inner);
+        slint_color_transparentize(&inner, factor, &result.inner);
         return result;
     }
 
@@ -208,7 +207,7 @@ public:
     /// factor` is applied to \a other.
     Color mix(const Color other, float factor) const {
         Color result;
-        cbindgen_private.types.slint_color_mix(&inner, &other.inner, factor, &result.inner);
+        slint_color_mix(&inner, &other.inner, factor, &result.inner);
         return result;
     }
 
@@ -233,8 +232,7 @@ public:
     //                   << ")";
     // }
 
-private:
-    Color inner;
+    ColorInner inner;
     // friend class private_api.LinearGradientBrush;
     // friend class Brush;
 }

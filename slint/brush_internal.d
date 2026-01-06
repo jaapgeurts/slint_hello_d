@@ -1,6 +1,7 @@
 module slint.brush_internal;
 
 import slint.color;
+import slint.color_internal;
 import slint.enums_internal;
 import slint.sharedvector;
 
@@ -54,7 +55,7 @@ struct Brush {
     }
 
     struct SolidColor_Body {
-        Color _0;
+        ColorInner _0;
 
         // bool operator==(const SolidColor_Body& other) const {
         //     return _0 == other._0;
@@ -105,12 +106,12 @@ struct Brush {
         ConicGradient_Body conic_gradient;
     }
 
-    // static Brush SolidColor(const Color _0) {
-    //     Brush result;
-    //     ::new (&result.solid_color._0) (Color)(_0);
-    //     result.tag = Tag.SolidColor;
-    //     return result;
-    // }
+    static Brush SolidColor(Color _0) {
+        Brush result;
+        result.tag = Tag.SolidColor;
+        result.solid_color._0 = _0.inner;
+        return result;
+    }
     //
     // bool IsSolidColor() const {
     //     return tag == Tag.SolidColor;

@@ -1,4 +1,6 @@
 SRCS = slint/builtin_structs_internal.d \
+       slint/color.d \
+       slint/color_internal.d \
        slint/events_internal.d \
        slint/image.d \
        slint/internal.d \

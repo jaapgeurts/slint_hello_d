@@ -20,7 +20,7 @@ import slint.enums_internal;
 ///
 /// let new_col = Color::from(RgbaColor{ red: 0.5, green: 0.65, blue: 0.32, alpha: 1.});
 /// ```
-struct Color {
+struct ColorInner {
     uint8_t red;
     uint8_t green;
     uint8_t blue;
@@ -42,18 +42,19 @@ struct Color {
 
 extern (C) {
 
-    void slint_color_brighter(const Color* col, float factor, Color* out_);
+    void slint_color_brighter(const ColorInner* col, float factor, ColorInner* out_);
 
-    void slint_color_darker(const Color* col, float factor, Color* out_);
+    void slint_color_darker(const ColorInner* col, float factor, ColorInner* out_);
 
-    void slint_color_transparentize(const Color* col, float factor, Color* out_);
+    void slint_color_transparentize(const ColorInner* col, float factor, ColorInner* out_);
 
-    void slint_color_mix(const Color* col1, const Color* col2, float factor, Color* out_);
+    void slint_color_mix(const ColorInner* col1, const ColorInner* col2,
+            float factor, ColorInner* out_);
 
-    void slint_color_with_alpha(const Color* col, float alpha, Color* out_);
+    void slint_color_with_alpha(const ColorInner* col, float alpha, ColorInner* out_);
 
-    void slint_color_to_hsva(const Color* col, float* h, float* s, float* v, float* a);
+    void slint_color_to_hsva(const ColorInner* col, float* h, float* s, float* v, float* a);
 
-    Color slint_color_from_hsva(float h, float s, float v, float a);
+    ColorInner slint_color_from_hsva(float h, float s, float v, float a);
 
 } // extern "C"

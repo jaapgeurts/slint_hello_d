@@ -328,8 +328,7 @@ private:
 
     private:
         alias Tag = Brush.Tag;
-        alias Inner = Brush;
-        Inner data;
+        brush_internal.Brush data;
         // friend struct private_api.Property<Brush>;
     }
 

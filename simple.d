@@ -4,6 +4,8 @@ import std.stdio;
 
 import core.stdc.stdint : uint8_t, uint32_t, uint64_t, uintptr_t, intptr_t;
 
+import slint.color;
+import slint.color_internal;
 import slint.enums_internal;
 import slint.events_internal;
 import slint.internal;
@@ -15,6 +17,7 @@ import slint.string_internal;
 import slint.string;
 import slint.vtable;
 import slint.window;
+import slint.brush_internal;
 
 // Equivalent types
 
@@ -192,10 +195,13 @@ void CreateWindow() {
     self_rc.inner.data.root_1.title.set(SharedString("Slint D Demo"));
     self_rc.inner.data.root_1.width.set(100);
     self_rc.inner.data.root_1.height.set(100);
+    self_rc.inner.data.root_1.background.set(
+            Brush.SolidColor(Color.from_argb_uint8(0xff, 0xff, 0x20, 0x20)));
 
     self_rc.inner.data.text_2.text.set(SharedString("hello world"));
     self_rc.inner.data.text_2.width.set(100);
     self_rc.inner.data.text_2.height.set(100);
+    // self_rc.inner.data.text_2.font_size.set(12);
 
     //void slint_register_item_tree(const ItemTreeRc* item_tree_rc,const WindowAdapterRcOpaque* window_handle);
     slint_register_item_tree(item_tree_rc, window_handle);
