@@ -23,6 +23,7 @@ import slint.timer;
 // /// \endrst
 //
 // /// Convert a slint `{height: length, width: length, x: length, y: length}` to a Rect
+// JG: Why so complex? Convert 4 values to a tuple first only to unpack them in a rect
 // inline cbindgen_private::Rect convert_anonymous_rect(std::tuple<float, float, float, float> tuple)
 // {
 //     // alphabetical order
@@ -96,7 +97,7 @@ import slint.timer;
 //
 // namespace private_api {
 //
-void register_item_tree(ref VRc!(ItemTreeVTable) c, Nullable!Window maybe_window) {
+void register_item_tree(VRc!(ItemTreeVTable)* c, Nullable!Window maybe_window) {
     const WindowAdapterRcOpaque* window_ptr = !maybe_window.isNull()
         ? maybe_window.get.window_handle().handle() : null;
     slint_register_item_tree(c, window_ptr);

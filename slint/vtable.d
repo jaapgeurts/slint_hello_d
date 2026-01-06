@@ -9,6 +9,7 @@ import std.stdio;
 import core.atomic;
 import core.lifetime;
 import core.stdc.stdint : uint8_t, uintptr_t;
+import core.stdc.stdlib;
 
 import slint.internal;
 
@@ -47,7 +48,10 @@ extern (C) {
             const VTable* vtable = &X.static_vtable;
         }
         else {
+            // TODO: should report error here.
             const VTable* vtable;
+            pragma(message,
+                    "Can't instantiate VRcInner. Second type doesn't not have a static_vtable member");
         }
         // TODO: review if we must use the 'shared' keyword for strong_ref and weak_ref
         // and make operation on it atomic
@@ -135,7 +139,6 @@ extern (C) {
         //     return new VRc!(VTable, X)(inner);
         // }
         static VRc!(VTable, X) make(Args...)(Args args) {
-            import core.stdc.stdlib : aligned_alloc;
 
             enum size = VRcInner!(VTable, X).sizeof;
             enum align_ = VRcInner!(VTable, X).alignof;
@@ -245,6 +248,11 @@ extern (C) {
         // const VTable *vtable() const { return inner ? inner->vtable : nullptr; }
     }
 
+}
+
+void vtable_dealloc(VTable)(const VTable*, uint8_t* ptr, Layout layout) {
+    // GLibC allows aligned memory to be released with free()
+    free(cast(void*) ptr);
 }
 
 //template<typename VTable, typename T>

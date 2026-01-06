@@ -1,6 +1,8 @@
 module slint.brush_internal;
 
+import slint.color;
 import slint.enums_internal;
+import slint.sharedvector;
 
 /// GradientStop describes a single color stop in a gradient. The colors between multiple
 /// stops are interpolated.
@@ -101,51 +103,51 @@ struct Brush {
         LinearGradient_Body linear_gradient;
         RadialGradient_Body radial_gradient;
         ConicGradient_Body conic_gradient;
-    };
-
-    static Brush SolidColor(const Color _0) {
-        Brush result;
-        ::new (&result.solid_color._0) (Color)(_0);
-        result.tag = Tag.SolidColor;
-        return result;
     }
 
-    bool IsSolidColor() const {
-        return tag == Tag.SolidColor;
-    }
-
-    static Brush LinearGradient(const LinearGradientBrush _0) {
-        Brush result;
-        ::new (&result.linear_gradient._0) (LinearGradientBrush)(_0);
-        result.tag = Tag.LinearGradient;
-        return result;
-    }
-
-    bool IsLinearGradient() const {
-        return tag == Tag.LinearGradient;
-    }
-
-    static Brush RadialGradient(const RadialGradientBrush _0) {
-        Brush result;
-        ::new (&result.radial_gradient._0) (RadialGradientBrush)(_0);
-        result.tag = Tag.RadialGradient;
-        return result;
-    }
-
-    bool IsRadialGradient() const {
-        return tag == Tag.RadialGradient;
-    }
-
-    static Brush ConicGradient(const ConicGradientBrush _0) {
-        Brush result;
-        ::new (&result.conic_gradient._0) (ConicGradientBrush)(_0);
-        result.tag = Tag.ConicGradient;
-        return result;
-    }
-
-    bool IsConicGradient() const {
-        return tag == Tag.ConicGradient;
-    }
+    // static Brush SolidColor(const Color _0) {
+    //     Brush result;
+    //     ::new (&result.solid_color._0) (Color)(_0);
+    //     result.tag = Tag.SolidColor;
+    //     return result;
+    // }
+    //
+    // bool IsSolidColor() const {
+    //     return tag == Tag.SolidColor;
+    // }
+    //
+    // static Brush LinearGradient(const LinearGradientBrush _0) {
+    //     Brush result;
+    //     ::new (&result.linear_gradient._0) (LinearGradientBrush)(_0);
+    //     result.tag = Tag.LinearGradient;
+    //     return result;
+    // }
+    //
+    // bool IsLinearGradient() const {
+    //     return tag == Tag.LinearGradient;
+    // }
+    //
+    // static Brush RadialGradient(const RadialGradientBrush _0) {
+    //     Brush result;
+    //     ::new (&result.radial_gradient._0) (RadialGradientBrush)(_0);
+    //     result.tag = Tag.RadialGradient;
+    //     return result;
+    // }
+    //
+    // bool IsRadialGradient() const {
+    //     return tag == Tag.RadialGradient;
+    // }
+    //
+    // static Brush ConicGradient(const ConicGradientBrush _0) {
+    //     Brush result;
+    //     ::new (&result.conic_gradient._0) (ConicGradientBrush)(_0);
+    //     result.tag = Tag.ConicGradient;
+    //     return result;
+    // }
+    //
+    // bool IsConicGradient() const {
+    //     return tag == Tag.ConicGradient;
+    // }
 
     // bool operator==(const Brush& other) const {
     //     if (tag != other.tag) {
@@ -165,33 +167,30 @@ struct Brush {
     //     return !(*this == other);
     // }
 
-    private:
-    this() {
+private:
 
-    }
-    public:
+public:
 
-
-    ~this() {
-        switch (tag) {
-            case Tag.SolidColor: solid_color.~this(); break;
-            case Tag.LinearGradient: linear_gradient.~this(); break;
-            case Tag.RadialGradient: radial_gradient.~this(); break;
-            case Tag.ConicGradient: conic_gradient.~this(); break;
-
-        }
+     ~this() {
+        // switch (tag) {
+        //     case Tag.SolidColor: solid_color.~this(); break;
+        //     case Tag.LinearGradient: linear_gradient.~this(); break;
+        //     case Tag.RadialGradient: radial_gradient.~this(); break;
+        //     case Tag.ConicGradient: conic_gradient.~this(); break;
+        //
+        // }
     }
 
-    Brush(const Brush& other)
-     : tag(other.tag) {
-        switch (tag) {
-            case Tag.SolidColor: ::new (&solid_color) (SolidColor_Body)(other.solid_color); break;
-            case Tag.LinearGradient: ::new (&linear_gradient) (LinearGradient_Body)(other.linear_gradient); break;
-            case Tag.RadialGradient: ::new (&radial_gradient) (RadialGradient_Body)(other.radial_gradient); break;
-            case Tag.ConicGradient: ::new (&conic_gradient) (ConicGradient_Body)(other.conic_gradient); break;
-
-        }
-    }
+    // Brush(const Brush& other)
+    //  : tag(other.tag) {
+    //     switch (tag) {
+    //         case Tag.SolidColor: ::new (&solid_color) (SolidColor_Body)(other.solid_color); break;
+    //         case Tag.LinearGradient: ::new (&linear_gradient) (LinearGradient_Body)(other.linear_gradient); break;
+    //         case Tag.RadialGradient: ::new (&radial_gradient) (RadialGradient_Body)(other.radial_gradient); break;
+    //         case Tag.ConicGradient: ::new (&conic_gradient) (ConicGradient_Body)(other.conic_gradient); break;
+    //
+    //     }
+    // }
     // Brush& operator=(const Brush& other) {
     //     if (this != &other) {
     //         this->~Brush();

@@ -2,10 +2,12 @@ module slint.internal;
 
 import std.traits;
 
+import slint.brush_internal;
 import slint.color;
 import slint.enums_internal;
 import slint.enums;
 import slint.events_internal;
+import slint.image;
 import slint.point;
 import slint.properties_internal;
 import slint.properties;
@@ -266,8 +268,17 @@ extern (C) {
 
     /// Same layout as WindowAdapterRc
     struct WindowAdapterRcOpaque {
-        const void* _0;
-        const void* _1;
+        // TODO: these two values were const
+        void* _0;
+        void* _1;
+    }
+
+    /// A range of indices
+    struct IndexRange {
+        /// Start index
+        uintptr_t start;
+        /// Index one past the last index
+        uintptr_t end;
     }
 
     /// The item tree is an array of ItemTreeNode representing a static tree of items
@@ -333,6 +344,17 @@ extern (C) {
 
     /// Type alias to the commonly used `Pin<VRef<ItemTreeVTable>>>`
     alias ItemTreeRefPin = Pin!(ItemTreeRef);
+
+    /// This structure must be present in items that are Rendered and contains information.
+    /// Used by the backend.
+    struct CachedRenderingData {
+        /// Used and modified by the backend, should be initialized to 0 by the user code
+        uintptr_t cache_index;
+        /// Used and modified by the backend, should be initialized to 0 by the user code.
+        /// The backend compares this generation against the one of the cache to verify
+        /// the validity of the cache_index field.
+        uintptr_t cache_generation;
+    }
 
     /// The implementation of the `PropertyAnimation` element
     struct PropertyAnimation {
@@ -504,12 +526,10 @@ extern (C) {
         Property!SharedString text;
         Property!LogicalLength font_size;
         Property!int32_t font_weight;
-        // TODO: replace with next line
-        Property!ulong color;
-        // Property!Brush color;
+        Property!Brush color;
         Property!TextHorizontalAlignment horizontal_alignment;
         Property!TextVerticalAlignment vertical_alignment;
-        // CachedRenderingData cached_rendering_data;
+        CachedRenderingData cached_rendering_data;
 
     }
     /// The implementation of the `Window` element
@@ -518,19 +538,18 @@ extern (C) {
 
         Property!LogicalLength width;
         Property!LogicalLength height;
-        // Property!Brush background; // TODO: remove next line
-        Property!(int) background;
+        Property!Brush background;
         Property!SharedString title;
         Property!bool no_frame;
         Property!LogicalLength resize_border_width;
         Property!bool always_on_top;
         Property!bool full_screen;
         // Property!Image icon; // TODO: keep this, remove next line
-        Property!ulong icon;
+        ubyte[64] pad;
         Property!SharedString default_font_family;
         Property!LogicalLength default_font_size;
         Property!int32_t default_font_weight;
-        // CachedRenderingData cached_rendering_data;
+        CachedRenderingData cached_rendering_data;
 
     }
 
@@ -566,7 +585,7 @@ extern (C) {
             const SharedString* format, int32_t* d, int32_t* m, int32_t* y);
 
     /// Call init() on the ItemVTable of each item in the item array.
-    void slint_register_item_tree(const ItemTreeRc item_tree_rc,
+    void slint_register_item_tree(const ItemTreeRc* item_tree_rc,
             const WindowAdapterRcOpaque* window_handle);
 
     // TODO: enable later

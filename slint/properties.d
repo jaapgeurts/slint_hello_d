@@ -2,12 +2,15 @@
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
 module slint.properties;
 
+import std.stdio;
+
 import core.memory;
 import core.stdc.stdint : uintptr_t, intptr_t, uint8_t, int32_t, uint32_t, uint64_t;
 
 import slint.properties_internal;
 import slint.internal;
 import slint.color;
+import slint.image;
 
 template PropertyCallback(T) {
     alias PropertyCallback = extern (C) void function(void*, T*);
@@ -51,29 +54,34 @@ void slint_property_set_animated_binding_helper(const PropertyHandleOpaque* hand
 //             handle, binding, user_data, drop_user_data, animation_data, transition_data);
 // }
 // TODO: think about how properties must be instantiated since default constructors are not allowed in D
+
 extern (C) struct Property(T) {
+
+    // @disable this();
 
     // TODO: think aout a good name
     void initialize() {
         import slint.string;
-        import std.stdio;
 
         this.inner._0 = 0;
         writeln("Property.initialize()");
-        static if (is(T == SharedString)) {
-            writeln("\tinit SharedString");
+        static if (is(T == SharedString) || is(T == Image)) {
+            writeln("\tinit SharedString or Image");
             value.initialize();
         }
         slint_property_init(&inner);
     }
 
     ~this() {
+        writeln("Property destructor called");
+        // TODO: fix later
         slint_property_drop(&inner);
     }
     // Property(const Property &) = delete;
     // Property(Property &&) = delete;
     // Property &operator=(const Property &) = delete;
     // this(const T value) {
+    //     writeln("REASSIGN");
     //     this.value = value;
     //     slint_property_init(&inner);
     // }
@@ -220,9 +228,9 @@ extern (C) struct Property(T) {
 
 private:
     PropertyHandleOpaque inner;
-    // TODO: alignment is wrong here for some reason. change to align(8). investigate why it's wrong.
+    // TODO: alignment is wrong here for some reason. change to align(16). investigate why it's wrong.
     // It used to be correct with the release zip 1.14.1 from github
-    ubyte[2] a;
+    // ubyte[2] a;
     T value;
     // template<typename F>
     // friend void set_state_binding(const Property<StateInfo> &property, F binding);

@@ -14,6 +14,7 @@ import slint.string_internal;
 import slint.string;
 import slint.enums_internal;
 import slint.properties;
+import slint.events_internal;
 
 // import slint.platform;
 import slint.window;
@@ -46,6 +47,7 @@ public:
 }
 
 extern (C) struct MainWindow {
+
     SharedGlobals m_globals = new SharedGlobals();
     ItemTreeWeak self_weak;
     SharedGlobals globals;
@@ -74,18 +76,18 @@ extern (C) struct MainWindow {
         auto dyn = self_rc.into_dyn();
         writeln("Before register_item_tree()");
 
-        register_item_tree(dyn, self.globals.m_window);
+        register_item_tree(&dyn, self.globals.m_window);
         self.init_(self.globals, self.self_weak, 0, 1);
         self.user_init();
         self.window();
         // TODO: run should not be called from here. Remove
-        self.run();
+        // self.run();
         return new ComponentHandle!MainWindow(self_rc);
     }
 
     __gshared const ItemTreeVTable static_vtable = ItemTreeVTable(&visit_children, &get_item_ref, null, null,
-            &get_item_tree, null, null, null, &layout_info, null, null, null,
-            null, null, null, null, null, null);
+            &get_item_tree, null, null, null, &layout_info, &item_geometry,
+            null, null, null, null, null, null, null,);
     // ItemTreeVTable( visit_children, get_item_ref, get_subtree_range, get_subtree, get_item_tree, parent_node, embed_component, subtree_index, layout_info, item_geometry, accessible_role, accessible_string_property, accessibility_action, supported_accessibility_actions, element_infos, window_adapter, drop_in_place<MainWindow>, dealloc );
 
     void run() {
@@ -225,15 +227,18 @@ extern (C) struct MainWindow {
                     ItemVisitorRefMut visitor, uint32_t dyn_index) {
                 auto self = *cast(const MainWindow*)(base);
                 import core.stdc.stdlib : abort;
+                import std.stdio;
 
+                stderr.writeln("Children tree visitor called without implementation: aborting");
                 abort();
             };
+            auto ci = component.instance;
+            auto mw = *cast(MainWindow*) ci;
+            auto sw = mw.m_globals.root_weak;
+            auto self_rc = sw.lock().get.into_dyn();
 
-            // auto self_rc = (*(cast(MainWindow*) component.instance)).self_weak.lock().get.into_dyn();
-
-            // return slint_visit_item_tree(&self_rc, get_item_tree(component),
-            // index, order, visitor, dyn_visit);
-            return 0;
+            return slint_visit_item_tree(&self_rc, get_item_tree(component),
+                    index, order, visitor, dyn_visit);
         }
 
     }
@@ -248,9 +253,25 @@ extern (C) struct MainWindow {
         return make_slice(children.ptr, children.length);
     }
 
+    static LogicalRect item_geometry(ItemTreeRef component, uint32_t index) {
+        return (*cast(MainWindow*) component.instance).item_geometry(index);
+    }
+
     LayoutInfo layout_info(Orientation o) {
         return o == Orientation.Horizontal
             ? this.root_1_layoutinfo_h.get() : this.root_1_layoutinfo_v.get();
+    }
+
+    Rect item_geometry(uint32_t index) {
+        auto self = this;
+        switch (index) {
+        case 0:
+            return Rect(self.root_1.height.get(), self.root_1.width.get(), 0, 0);
+        case 1:
+            return Rect(self.text_2.height.get(), self.text_2.width.get(), 150, 50);
+        default:
+            return Rect.init;
+        }
     }
 
     void user_init() {

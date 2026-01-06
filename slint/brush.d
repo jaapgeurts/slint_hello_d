@@ -4,7 +4,9 @@ module slint.brush;
 
 import slint.color;
 import slint.brush_internal;
-/+
+
+extern (C++) {
+    /+
 /// \private
 /// LinearGradientBrush represents a gradient for a brush that is a linear sequence of color stops,
 /// that are aligned at a specific angle.
@@ -130,214 +132,205 @@ private:
 
 }+/
 
-/// Brush is used to declare how to fill or outline shapes, such as rectangles, paths or text. A
-/// brush is either a solid color or a linear gradient.
-class Brush
-{
-public:
-    /// Constructs a new brush that is a transparent color.
-    // this() {}
+    /// Brush is used to declare how to fill or outline shapes, such as rectangles, paths or text. A
+    /// brush is either a solid color or a linear gradient.
+    class Brush {
+    public:
+        /// Constructs a new brush that is a transparent color.
+        // this() {}
 
-    /// Constructs a new brush that is of color \a color.
-    this(const Color color) {
-        data(Inner.SolidColor(color.inner)) { }
+        /// Constructs a new brush that is of color \a color.
+        this(const Color color) {
+            // data(Inner.SolidColor(color.inner)) { }
+        }
+
+        /// \private
+        /// Constructs a new brush that is the gradient \a gradient.
+        // Brush(const private_api.LinearGradientBrush &gradient)
+        //     : data(Inner.LinearGradient(gradient.inner))
+        // {
+        // }
+
+        /// \private
+        /// Constructs a new brush that is the gradient \a gradient.
+        // Brush(const private_api.RadialGradientBrush &gradient)
+        //     : data(Inner.RadialGradient(gradient.inner))
+        // {
+        // }
+
+        /// \private
+        /// Constructs a new brush that is the gradient \a gradient.
+        // Brush(const private_api.ConicGradientBrush &gradient)
+        //     : data(Inner.ConicGradient(gradient.inner))
+        // {
+        // }
+
+        /// Returns the color of the brush. If the brush is a gradient, this function returns the color
+        /// of the first stop.
+        Color color() const {
+            Color result;
+            switch (data.tag) {
+            case Tag.SolidColor:
+                result.inner = data.solid_color._0;
+                break;
+            case Tag.LinearGradient:
+                if (data.linear_gradient._0.size() > 1) {
+                    result.inner = data.linear_gradient._0[1].color;
+                }
+                break;
+            case Tag.RadialGradient:
+                if (data.radial_gradient._0.size() > 0) {
+                    result.inner = data.radial_gradient._0[0].color;
+                }
+                break;
+            case Tag.ConicGradient:
+                if (data.conic_gradient._0.size() > 0) {
+                    result.inner = data.conic_gradient._0[0].color;
+                }
+                break;
+            }
+            return result;
+        }
+
+        /// Returns a new version of this brush that has the brightness increased
+        /// by the specified factor. This is done by calling Color.brighter on
+        /// all the colors of this brush.
+        Brush brighter(float factor) const {
+            Brush result = *this;
+            switch (data.tag) {
+            case Tag.SolidColor:
+                cbindgen_private.types.slint_color_brighter(&data.solid_color._0,
+                        factor, &result.data.solid_color._0);
+                break;
+            case Tag.LinearGradient:
+                for (std.size_t i = 1; i < data.linear_gradient._0.size(); ++i) {
+                    cbindgen_private.types.slint_color_brighter(&data.linear_gradient._0[i].color,
+                            factor, &result.data.linear_gradient._0[i].color);
+                }
+                break;
+            case Tag.RadialGradient:
+                for (std.size_t i = 0; i < data.radial_gradient._0.size(); ++i) {
+                    cbindgen_private.types.slint_color_brighter(&data.radial_gradient._0[i].color,
+                            factor, &result.data.radial_gradient._0[i].color);
+                }
+                break;
+            case Tag.ConicGradient:
+                for (std.size_t i = 0; i < data.conic_gradient._0.size(); ++i) {
+                    cbindgen_private.types.slint_color_brighter(&data.conic_gradient._0[i].color,
+                            factor, &result.data.conic_gradient._0[i].color);
+                }
+                break;
+            }
+            return result;
+        }
+        /// Returns a new version of this color that has the brightness decreased
+        /// by the specified factor. This is done by calling Color.darker on
+        /// all the colors of this brush.
+        Brush darker(float factor) const {
+            Brush result = *this;
+            switch (data.tag) {
+            case Tag.SolidColor:
+                cbindgen_private.types.slint_color_darker(&data.solid_color._0,
+                        factor, &result.data.solid_color._0);
+                break;
+            case Tag.LinearGradient:
+                for (std.size_t i = 1; i < data.linear_gradient._0.size(); ++i) {
+                    cbindgen_private.types.slint_color_darker(&data.linear_gradient._0[i].color,
+                            factor, &result.data.linear_gradient._0[i].color);
+                }
+                break;
+            case Tag.RadialGradient:
+                for (std.size_t i = 0; i < data.radial_gradient._0.size(); ++i) {
+                    cbindgen_private.types.slint_color_darker(&data.radial_gradient._0[i].color,
+                            factor, &result.data.radial_gradient._0[i].color);
+                }
+                break;
+            case Tag.ConicGradient:
+                for (std.size_t i = 0; i < data.conic_gradient._0.size(); ++i) {
+                    cbindgen_private.types.slint_color_darker(&data.conic_gradient._0[i].color,
+                            factor, &result.data.conic_gradient._0[i].color);
+                }
+                break;
+            }
+            return result;
+        }
+
+        /// Returns a new version of this brush with the opacity decreased by \a factor.
+        ///
+        /// This is done by calling Color.transparentize on all the colors of this brush.
+        Brush transparentize(float factor) const {
+            Brush result = *this;
+            switch (data.tag) {
+            case Tag.SolidColor:
+                cbindgen_private.types.slint_color_transparentize(&data.solid_color._0,
+                        factor, &result.data.solid_color._0);
+                break;
+            case Tag.LinearGradient:
+                for (std.size_t i = 1; i < data.linear_gradient._0.size(); ++i) {
+                    cbindgen_private.types.slint_color_transparentize(&data.linear_gradient._0[i].color,
+                            factor, &result.data.linear_gradient._0[i].color);
+                }
+                break;
+            case Tag.RadialGradient:
+                for (std.size_t i = 0; i < data.radial_gradient._0.size(); ++i) {
+                    cbindgen_private.types.slint_color_transparentize(&data.radial_gradient._0[i].color,
+                            factor, &result.data.radial_gradient._0[i].color);
+                }
+                break;
+            case Tag.ConicGradient:
+                for (std.size_t i = 0; i < data.conic_gradient._0.size(); ++i) {
+                    cbindgen_private.types.slint_color_transparentize(&data.conic_gradient._0[i].color,
+                            factor, &result.data.conic_gradient._0[i].color);
+                }
+                break;
+            }
+            return result;
+        }
+
+        /// Returns a new version of this brush with the related color's opacities
+        /// set to \a alpha.
+        Brush with_alpha(float alpha) const {
+            Brush result = *this;
+            switch (data.tag) {
+            case Tag.SolidColor:
+                cbindgen_private.types.slint_color_with_alpha(&data.solid_color._0,
+                        alpha, &result.data.solid_color._0);
+                break;
+            case Tag.LinearGradient:
+                for (std.size_t i = 1; i < data.linear_gradient._0.size(); ++i) {
+                    cbindgen_private.types.slint_color_with_alpha(&data.linear_gradient._0[i].color,
+                            alpha, &result.data.linear_gradient._0[i].color);
+                }
+                break;
+            case Tag.RadialGradient:
+                for (std.size_t i = 0; i < data.radial_gradient._0.size(); ++i) {
+                    cbindgen_private.types.slint_color_with_alpha(&data.radial_gradient._0[i].color,
+                            alpha, &result.data.radial_gradient._0[i].color);
+                }
+                break;
+            case Tag.ConicGradient:
+                for (std.size_t i = 0; i < data.conic_gradient._0.size(); ++i) {
+                    cbindgen_private.types.slint_color_with_alpha(&data.conic_gradient._0[i].color,
+                            alpha, &result.data.conic_gradient._0[i].color);
+                }
+                break;
+            }
+            return result;
+        }
+
+        /// Returns true if \a a is equal to \a b. If \a a holds a color, then \a b must also hold a
+        /// color that is identical to \a a's color. If it holds a gradient, then the gradients must be
+        /// identical. Returns false if the brushes differ in what they hold or their respective color
+        /// or gradient are not equal.
+        // friend bool operator==(const Brush &a, const Brush &b) { return a.data == b.data; }
+        /// Returns false if \a is not equal to \a b; true otherwise.
+        // friend bool operator!=(const Brush &a, const Brush &b) { return a.data != b.data; }
+
+    private:
+        alias Tag = Brush.Tag;
+        alias Inner = Brush;
+        Inner data;
+        // friend struct private_api.Property<Brush>;
     }
 
-    /// \private
-    /// Constructs a new brush that is the gradient \a gradient.
-    // Brush(const private_api.LinearGradientBrush &gradient)
-    //     : data(Inner.LinearGradient(gradient.inner))
-    // {
-    // }
-
-    /// \private
-    /// Constructs a new brush that is the gradient \a gradient.
-    // Brush(const private_api.RadialGradientBrush &gradient)
-    //     : data(Inner.RadialGradient(gradient.inner))
-    // {
-    // }
-
-    /// \private
-    /// Constructs a new brush that is the gradient \a gradient.
-    // Brush(const private_api.ConicGradientBrush &gradient)
-    //     : data(Inner.ConicGradient(gradient.inner))
-    // {
-    // }
-
-    /// Returns the color of the brush. If the brush is a gradient, this function returns the color
-    /// of the first stop.
-    Color color() const {
-       Color result;
-    switch (data.tag) {
-    case Tag.SolidColor:
-        result.inner = data.solid_color._0;
-        break;
-    case Tag.LinearGradient:
-        if (data.linear_gradient._0.size() > 1) {
-            result.inner = data.linear_gradient._0[1].color;
-        }
-        break;
-    case Tag.RadialGradient:
-        if (data.radial_gradient._0.size() > 0) {
-            result.inner = data.radial_gradient._0[0].color;
-        }
-        break;
-    case Tag.ConicGradient:
-        if (data.conic_gradient._0.size() > 0) {
-            result.inner = data.conic_gradient._0[0].color;
-        }
-        break;
-    }
-    return result;
-    }
-
-    /// Returns a new version of this brush that has the brightness increased
-    /// by the specified factor. This is done by calling Color.brighter on
-    /// all the colors of this brush.
-    Brush brighter(float factor) const {
-     Brush result = *this;
-    switch (data.tag) {
-    case Tag.SolidColor:
-        cbindgen_private.types.slint_color_brighter(&data.solid_color._0, factor,
-                                                      &result.data.solid_color._0);
-        break;
-    case Tag.LinearGradient:
-        for (std.size_t i = 1; i < data.linear_gradient._0.size(); ++i) {
-            cbindgen_private.types.slint_color_brighter(&data.linear_gradient._0[i].color, factor,
-                                                          &result.data.linear_gradient._0[i].color);
-        }
-        break;
-    case Tag.RadialGradient:
-        for (std.size_t i = 0; i < data.radial_gradient._0.size(); ++i) {
-            cbindgen_private.types.slint_color_brighter(&data.radial_gradient._0[i].color, factor,
-                                                          &result.data.radial_gradient._0[i].color);
-        }
-        break;
-    case Tag.ConicGradient:
-        for (std.size_t i = 0; i < data.conic_gradient._0.size(); ++i) {
-            cbindgen_private.types.slint_color_brighter(&data.conic_gradient._0[i].color, factor,
-                                                          &result.data.conic_gradient._0[i].color);
-        }
-        break;
-    }
-    return result;
-    }
-    /// Returns a new version of this color that has the brightness decreased
-    /// by the specified factor. This is done by calling Color.darker on
-    /// all the colors of this brush.
-    Brush darker(float factor) const {
-      Brush result = *this;
-    switch (data.tag) {
-    case Tag.SolidColor:
-        cbindgen_private.types.slint_color_darker(&data.solid_color._0, factor,
-                                                    &result.data.solid_color._0);
-        break;
-    case Tag.LinearGradient:
-        for (std.size_t i = 1; i < data.linear_gradient._0.size(); ++i) {
-            cbindgen_private.types.slint_color_darker(&data.linear_gradient._0[i].color, factor,
-                                                        &result.data.linear_gradient._0[i].color);
-        }
-        break;
-    case Tag.RadialGradient:
-        for (std.size_t i = 0; i < data.radial_gradient._0.size(); ++i) {
-            cbindgen_private.types.slint_color_darker(&data.radial_gradient._0[i].color, factor,
-                                                        &result.data.radial_gradient._0[i].color);
-        }
-        break;
-    case Tag.ConicGradient:
-        for (std.size_t i = 0; i < data.conic_gradient._0.size(); ++i) {
-            cbindgen_private.types.slint_color_darker(&data.conic_gradient._0[i].color, factor,
-                                                        &result.data.conic_gradient._0[i].color);
-        }
-        break;
-    }
-    return result;
-    }
-
-    /// Returns a new version of this brush with the opacity decreased by \a factor.
-    ///
-    /// This is done by calling Color.transparentize on all the colors of this brush.
-    Brush transparentize(float factor) const {
-     Brush result = *this;
-    switch (data.tag) {
-    case Tag.SolidColor:
-        cbindgen_private.types.slint_color_transparentize(&data.solid_color._0, factor,
-                                                            &result.data.solid_color._0);
-        break;
-    case Tag.LinearGradient:
-        for (std.size_t i = 1; i < data.linear_gradient._0.size(); ++i) {
-            cbindgen_private.types.slint_color_transparentize(
-                    &data.linear_gradient._0[i].color, factor,
-                    &result.data.linear_gradient._0[i].color);
-        }
-        break;
-    case Tag.RadialGradient:
-        for (std.size_t i = 0; i < data.radial_gradient._0.size(); ++i) {
-            cbindgen_private.types.slint_color_transparentize(
-                    &data.radial_gradient._0[i].color, factor,
-                    &result.data.radial_gradient._0[i].color);
-        }
-        break;
-    case Tag.ConicGradient:
-        for (std.size_t i = 0; i < data.conic_gradient._0.size(); ++i) {
-            cbindgen_private.types.slint_color_transparentize(
-                    &data.conic_gradient._0[i].color, factor,
-                    &result.data.conic_gradient._0[i].color);
-        }
-        break;
-    }
-    return result;
-    }
-
-    /// Returns a new version of this brush with the related color's opacities
-    /// set to \a alpha.
-    Brush with_alpha(float alpha) const {
-     Brush result = *this;
-    switch (data.tag) {
-    case Tag.SolidColor:
-        cbindgen_private.types.slint_color_with_alpha(&data.solid_color._0, alpha,
-                                                        &result.data.solid_color._0);
-        break;
-    case Tag.LinearGradient:
-        for (std.size_t i = 1; i < data.linear_gradient._0.size(); ++i) {
-            cbindgen_private.types.slint_color_with_alpha(
-                    &data.linear_gradient._0[i].color, alpha,
-                    &result.data.linear_gradient._0[i].color);
-        }
-        break;
-    case Tag.RadialGradient:
-        for (std.size_t i = 0; i < data.radial_gradient._0.size(); ++i) {
-            cbindgen_private.types.slint_color_with_alpha(
-                    &data.radial_gradient._0[i].color, alpha,
-                    &result.data.radial_gradient._0[i].color);
-        }
-        break;
-    case Tag.ConicGradient:
-        for (std.size_t i = 0; i < data.conic_gradient._0.size(); ++i) {
-            cbindgen_private.types.slint_color_with_alpha(
-                    &data.conic_gradient._0[i].color, alpha,
-                    &result.data.conic_gradient._0[i].color);
-        }
-        break;
-    }
-    return result;
-    }
-
-    /// Returns true if \a a is equal to \a b. If \a a holds a color, then \a b must also hold a
-    /// color that is identical to \a a's color. If it holds a gradient, then the gradients must be
-    /// identical. Returns false if the brushes differ in what they hold or their respective color
-    /// or gradient are not equal.
-    // friend bool operator==(const Brush &a, const Brush &b) { return a.data == b.data; }
-    /// Returns false if \a is not equal to \a b; true otherwise.
-    // friend bool operator!=(const Brush &a, const Brush &b) { return a.data != b.data; }
-
-private:
-    alias Tag = Brush.Tag;
-    alias Inner = Brush;
-    Inner data;
-    // friend struct private_api.Property<Brush>;
 }
-
-
-
-

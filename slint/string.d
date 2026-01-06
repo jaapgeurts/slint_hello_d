@@ -43,7 +43,7 @@ extern (C) struct SharedString {
 
     void initialize() {
         writefln("SharedString.initialize() called: this=%s", &this);
-        slint_shared_string_from_bytes(cast(SharedString*)&this.inner, "DLang".ptr, 5);
+        slint_shared_string_from_bytes(cast(SharedString*)&this.inner, "".ptr, 0);
     }
 
     /// Creates a new SharedString from \a other.
