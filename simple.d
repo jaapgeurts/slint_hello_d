@@ -34,47 +34,48 @@ import slint.brush_internal;
 // }
 // alias ItemArrayEntry = VOffset!(uint8_t, ItemVTable, AllowPin);
 // alias ItemArray = Slice!(ItemArrayEntry);
-
-pragma(mangle, "BasicBorderRectangleVTable") extern __gshared const(ItemVTable) BasicBorderRectangleVTable;
-pragma(mangle, "BorderRectangleVTable") extern __gshared const(ItemVTable) BorderRectangleVTable;
-pragma(mangle, "BoxShadowVTable") extern __gshared const(ItemVTable) BoxShadowVTable;
-pragma(mangle, "ClippedImageVTable") extern __gshared const(ItemVTable) ClippedImageVTable;
-pragma(mangle, "ClipVTable") extern __gshared const(ItemVTable) ClipVTable;
-pragma(mangle, "ComplexTextVTable") extern __gshared const(ItemVTable) ComplexTextVTable;
-pragma(mangle, "ComponentContainerVTable") extern __gshared const(ItemVTable) ComponentContainerVTable;
-pragma(mangle, "ContextMenuVTable") extern __gshared const(ItemVTable) ContextMenuVTable;
-pragma(mangle, "DragAreaVTable") extern __gshared const(ItemVTable) DragAreaVTable;
-pragma(mangle, "DropAreaVTable") extern __gshared const(ItemVTable) DropAreaVTable;
-pragma(mangle, "EmptyVTable") extern __gshared const(ItemVTable) EmptyVTable;
-pragma(mangle, "FlickableVTable") extern __gshared const(ItemVTable) FlickableVTable;
-pragma(mangle, "FocusScopeVTable") extern __gshared const(ItemVTable) FocusScopeVTable;
-pragma(mangle, "ImageItemVTable") extern __gshared const(ItemVTable) ImageItemVTable;
-pragma(mangle, "LayerVTable") extern __gshared const(ItemVTable) LayerVTable;
-pragma(mangle, "MarkdownTextVTable") extern __gshared const(ItemVTable) MarkdownTextVTable;
-pragma(mangle, "MenuItemVTable") extern __gshared const(ItemVTable) MenuItemVTable;
-pragma(mangle, "NativeButtonVTable") extern __gshared const(ItemVTable) NativeButtonVTable;
-pragma(mangle, "NativeCheckBoxVTable") extern __gshared const(ItemVTable) NativeCheckBoxVTable;
-pragma(mangle, "NativeComboBoxPopupVTable") extern __gshared const(ItemVTable) NativeComboBoxPopupVTable;
-pragma(mangle, "NativeComboBoxVTable") extern __gshared const(ItemVTable) NativeComboBoxVTable;
-pragma(mangle, "NativeGroupBoxVTable") extern __gshared const(ItemVTable) NativeGroupBoxVTable;
-pragma(mangle, "NativeLineEditVTable") extern __gshared const(ItemVTable) NativeLineEditVTable;
-pragma(mangle, "NativeProgressIndicatorVTable") extern __gshared const(ItemVTable) NativeProgressIndicatorVTable;
-pragma(mangle, "NativeScrollViewVTable") extern __gshared const(ItemVTable) NativeScrollViewVTable;
-pragma(mangle, "NativeSliderVTable") extern __gshared const(ItemVTable) NativeSliderVTable;
-pragma(mangle, "NativeSpinBoxVTable") extern __gshared const(ItemVTable) NativeSpinBoxVTable;
-pragma(mangle, "NativeStandardListViewItemVTable") extern __gshared const(ItemVTable) NativeStandardListViewItemVTable;
-pragma(mangle, "NativeTableHeaderSectionVTable") extern __gshared const(ItemVTable) NativeTableHeaderSectionVTable;
-pragma(mangle, "NativeTabVTable") extern __gshared const(ItemVTable) NativeTabVTable;
-pragma(mangle, "NativeTabWidgetVTable") extern __gshared const(ItemVTable) NativeTabWidgetVTable;
-pragma(mangle, "OpacityVTable") extern __gshared const(ItemVTable) OpacityVTable;
-pragma(mangle, "PathVTable") extern __gshared const(ItemVTable) PathVTable;
-pragma(mangle, "RectangleVTable") extern __gshared const(ItemVTable) RectangleVTable;
-pragma(mangle, "SimpleTextVTable") extern __gshared const(ItemVTable) SimpleTextVTable;
-pragma(mangle, "SwipeGestureHandlerVTable") extern __gshared const(ItemVTable) SwipeGestureHandlerVTable;
-pragma(mangle, "TextInputVTable") extern __gshared const(ItemVTable) TextInputVTable;
-pragma(mangle, "TouchAreaVTable") extern __gshared const(ItemVTable) TouchAreaVTable;
-pragma(mangle, "TransformVTable") extern __gshared const(ItemVTable) TransformVTable;
-pragma(mangle, "WindowItemVTable") extern __gshared const(ItemVTable) WindowItemVTable;
+extern (C) {
+    extern const(ItemVTable) BasicBorderRectangleVTable;
+    extern const(ItemVTable) BorderRectangleVTable;
+    extern const(ItemVTable) BoxShadowVTable;
+    extern const(ItemVTable) ClippedImageVTable;
+    extern const(ItemVTable) ClipVTable;
+    extern const(ItemVTable) ComplexTextVTable;
+    extern const(ItemVTable) ComponentContainerVTable;
+    extern const(ItemVTable) ContextMenuVTable;
+    extern const(ItemVTable) DragAreaVTable;
+    extern const(ItemVTable) DropAreaVTable;
+    extern const(ItemVTable) EmptyVTable;
+    extern const(ItemVTable) FlickableVTable;
+    extern const(ItemVTable) FocusScopeVTable;
+    extern const(ItemVTable) ImageItemVTable;
+    extern const(ItemVTable) LayerVTable;
+    extern const(ItemVTable) MarkdownTextVTable;
+    extern const(ItemVTable) MenuItemVTable;
+    extern const(ItemVTable) NativeButtonVTable;
+    extern const(ItemVTable) NativeCheckBoxVTable;
+    extern const(ItemVTable) NativeComboBoxPopupVTable;
+    extern const(ItemVTable) NativeComboBoxVTable;
+    extern const(ItemVTable) NativeGroupBoxVTable;
+    extern const(ItemVTable) NativeLineEditVTable;
+    extern const(ItemVTable) NativeProgressIndicatorVTable;
+    extern const(ItemVTable) NativeScrollViewVTable;
+    extern const(ItemVTable) NativeSliderVTable;
+    extern const(ItemVTable) NativeSpinBoxVTable;
+    extern const(ItemVTable) NativeStandardListViewItemVTable;
+    extern const(ItemVTable) NativeTableHeaderSectionVTable;
+    extern const(ItemVTable) NativeTabVTable;
+    extern const(ItemVTable) NativeTabWidgetVTable;
+    extern const(ItemVTable) OpacityVTable;
+    extern const(ItemVTable) PathVTable;
+    extern const(ItemVTable) RectangleVTable;
+    extern const(ItemVTable) SimpleTextVTable;
+    extern const(ItemVTable) SwipeGestureHandlerVTable;
+    extern const(ItemVTable) TextInputVTable;
+    extern const(ItemVTable) TouchAreaVTable;
+    extern const(ItemVTable) TransformVTable;
+    extern const(ItemVTable) WindowItemVTable;
+}
 
 VWeak!(ItemTreeVTable, Dyn) root_weak;
 Window window;
@@ -95,10 +96,11 @@ extern (C) struct MainWindow {
 
     // TODO: stop this nonsense
     // inline const slint::private_api::ItemTreeVTable MainWindow::static_vtable = { visit_children, get_item_ref, get_subtree_range, get_subtree, get_item_tree, parent_node, embed_component, subtree_index, layout_info, item_geometry, accessible_role, accessible_string_property, accessibility_action, supported_accessibility_actions, element_infos, window_adapter, slint::private_api::drop_in_place<MainWindow>, slint::private_api::dealloc };
-    __gshared const ItemTreeVTable static_vtable = ItemTreeVTable(&visit_children,
-            &get_item_ref, &get_subtree_range, &get_subtree,
-            &get_item_tree, &parent_node, &embed_component, &subtree_index, &layout_info, &item_geometry,
-            null, null, null, null, &element_infos, &window_adapter, null, &dealloc);
+    __gshared const ItemTreeVTable static_vtable = {
+        &visit_children, &get_item_ref, &get_subtree_range, &get_subtree, &get_item_tree, &parent_node,
+            &embed_component, &subtree_index, &layout_info, &item_geometry, null, null, null, null,
+            &element_infos, &window_adapter, &drop_in_place!MainWindow, &dealloc
+    };
 
     // ItemTreeVTable( visit_children, get_item_ref, get_subtree_range, get_subtree, get_item_tree, parent_node, embed_component, subtree_index, layout_info, item_geometry, accessible_role, accessible_string_property, accessibility_action, supported_accessibility_actions, element_infos, window_adapter, drop_in_place<MainWindow>, dealloc );
 
@@ -118,7 +120,7 @@ extern (C) struct MainWindow {
     }
 
     static const(ItemArray) item_array() {
-        ItemArrayEntry[] items = [
+        static ItemArrayEntry[] items = [
             // TODO: fix later
             {&WindowItemVTable, MainWindow.root_1.offsetof},
             {&SimpleTextVTable, MainWindow.text_2.offsetof}
@@ -226,10 +228,13 @@ void CreateWindow() {
     VRc!(ItemTreeVTable, MainWindow) self_rc = VRc!(ItemTreeVTable, MainWindow).make();
     item_tree_rc = cast(ItemTreeRc*)&self_rc;
 
+    slint_ensure_backend();
+
     // std::cout << "Align  of: " << alignof(slint::cbindgen_private::WindowItem::title) << std::endl;
     // std::cout << "Offset of: " << offsetof(slint::cbindgen_private::WindowItem, title) << std::endl;
     writeln("Align  of: ", WindowItem.default_font_family.alignof);
     writeln("Offset of: ", WindowItem.default_font_family.offsetof);
+    writefln("WindomItemVTable: %s", &WindowItemVTable);
 
     self_rc.inner.data.root_1.title.set(SharedString("Slint D Demo"));
     self_rc.inner.data.root_1.width.set(800);
@@ -259,7 +264,7 @@ void CreateWindow() {
     auto vweak = VWeak!(ItemTreeVTable, MainWindow)(self_rc);
     root_weak = *cast(VWeak!(ItemTreeVTable, Dyn)*) cast(void*)&vweak;
     window.window_handle().set_component(root_weak);
-    auto wh = window.window_handle(); // risky
+    // auto wh = window.window_handle(); // risky
 
     // LayoutInfo a1 = item_layout_info(&WindowItemVTable, &self_rc.inner.data.root_1,
     //         Orientation.Horizontal, wh, item_tree_rc, // self->self_weak.lock()->into_dyn(),

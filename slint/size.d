@@ -18,10 +18,10 @@ struct Size(T) {
 
 // The Size types are expanded to the Size2D<...> type from the euclid crate which
 // is binary compatible with Size<T>
-alias Size2D(T) = Size!(T);
+alias Size2D(T) = Size!T;
 
 /// A size given in logical pixels
-alias LogicalSize = Size!(float);
+alias LogicalSize = Size!float;
 
 /// A size given in physical pixels.
-alias PhysicalSize = Size!(uint32_t);
+alias PhysicalSize = Size!uint32_t;

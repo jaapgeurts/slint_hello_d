@@ -40,10 +40,9 @@ import slint.timer;
 // }
 //
 // template<typename T>
-// inline vtable::Layout drop_in_place(ItemTreeRef item_tree)
-// {
-//     return vtable::drop_in_place<ItemTreeVTable, T>(item_tree);
-// }
+extern (C) Layout drop_in_place(T)(ItemTreeRef item_tree) {
+    return slint.vtable.drop_in_place!(ItemTreeVTable, T)(item_tree);
+}
 //
 // #if !defined(DOXYGEN)
 // #    if defined(_WIN32) || defined(_WIN64)

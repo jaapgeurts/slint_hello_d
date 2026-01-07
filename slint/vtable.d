@@ -258,6 +258,6 @@ void vtable_dealloc(VTable)(const VTable*, uint8_t* ptr, Layout layout) {
 //template<typename VTable, typename T>
 Layout drop_in_place(VTable, T)(VRefMut!(VTable) item_tree) {
     writeln("Dropped item");
-    (cast(T*)(item_tree.instance)).destroy();
-    return vtable.Layout(T.sizeof, T.alignof);
+    // delete(cast(T*)(item_tree.instance));
+    return Layout(T.sizeof, T.alignof);
 }

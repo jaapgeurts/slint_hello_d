@@ -95,7 +95,7 @@ public:
         slint_windowrc_set_focus_item(&inner, &item_rc, set_focus, reason);
     }
 
-    void set_component(ref ItemTreeWeak weak) const {
+    void set_component(ItemTreeWeak weak) const {
         writeln("before set_component()");
         auto item_tree_rc = weak.lock().get().into_dyn();
         slint_windowrc_set_component(&inner, &item_tree_rc);
