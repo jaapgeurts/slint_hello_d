@@ -2,8 +2,10 @@
 // // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
 module slint.slint;
 
+import core.stdc.stdint : uint32_t;
 import std.typecons;
 
+import slint.enums_internal;
 import slint.internal;
 import slint.platform_internal;
 import slint.window;
@@ -73,27 +75,7 @@ import slint.timer;
 //
 // } // namespace private_api
 //
-// namespace cbindgen_private {
-// inline LayoutInfo LayoutInfo::merge(const LayoutInfo &other) const
-// {
-//     // Note: This "logic" is duplicated from LayoutInfo::merge in layout.rs.
-//     return LayoutInfo { std::min(max, other.max),
-//                         std::min(max_percent, other.max_percent),
-//                         std::max(min, other.min),
-//                         std::max(min_percent, other.min_percent),
-//                         std::max(preferred, other.preferred),
-//                         std::min(stretch, other.stretch) };
-// }
-// inline bool operator==(const EasingCurve &a, const EasingCurve &b)
-// {
-//     if (a.tag != b.tag) {
-//         return false;
-//     } else if (a.tag == EasingCurve::Tag::CubicBezier) {
-//         return std::equal(a.cubic_bezier._0, a.cubic_bezier._0 + 4, b.cubic_bezier._0);
-//     }
-//     return true;
-// }
-// }
+
 //
 // namespace private_api {
 //
@@ -149,15 +131,13 @@ void register_item_tree(VRc!(ItemTreeVTable)* c, Nullable!Window maybe_window) {
 //     return idx < cache.size() ? cache[idx] : 0;
 // }
 //
-// template<typename VT, typename ItemType>
-// inline cbindgen_private::LayoutInfo
-// item_layout_info(VT *itemvtable, ItemType *item_ptr, cbindgen_private::Orientation orientation,
-//                  WindowAdapterRc *window_adapter, const ItemTreeRc &component_rc,
-//                  uint32_t item_index)
-// {
-//     cbindgen_private::ItemRc item_rc { component_rc, item_index };
-//     return itemvtable->layout_info({ itemvtable, item_ptr }, orientation, window_adapter, &item_rc);
-// }
+LayoutInfo item_layout_info(VT, ItemType)(const(VT)* itemvtable, ItemType* item_ptr,
+        Orientation orientation, WindowAdapterRc window_adapter,
+        ItemTreeRc* component_rc, uint32_t item_index) {
+    ItemRc item_rc = {component_rc, item_index};
+    return itemvtable.layout_info(ItemRef(itemvtable, item_ptr), orientation,
+            cast(WindowAdapterRc*) window_adapter.handle(), &item_rc);
+}
 // } // namespace private_api
 //
 // namespace private_api {

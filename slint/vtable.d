@@ -55,9 +55,9 @@ extern (C) {
         }
         // TODO: review if we must use the 'shared' keyword for strong_ref and weak_ref
         // and make operation on it atomic
-        int strong_ref = 10;
-        int weak_ref = 10;
-        // __traits(fieldOffset, VRcInner, data);
+        int strong_ref = 100;
+        int weak_ref = 100;
+
         ushort data_offset = VRcInner!(VTable, X).data.offsetof;
         union {
             X data;
@@ -84,11 +84,11 @@ extern (C) {
 
         }
 
-        // this(VRc!(VTable, X) other) {
-        //     writeln("VRc copy constructor called");
-        //     this.inner = other.inner;
-        //     // other.string_ref++;
-        // }
+        this(VRc!(VTable, X)* other) {
+            writeln("VRc copy constructor called");
+            this.inner = other.inner;
+            // other.string_ref++;
+        }
 
     public:
          ~this() {
@@ -215,8 +215,8 @@ extern (C) {
         }
 
         ~this() {
-            if (inner)
-                inner.weak_ref--;
+            // if (inner)
+            //     inner.weak_ref--;
             // if (inner && !--inner.weak_ref) {
             //     inner.vtable.dealloc(inner.vtable, cast(ubyte*)(inner), inner.layout);
             // }
@@ -257,6 +257,7 @@ void vtable_dealloc(VTable)(const VTable*, uint8_t* ptr, Layout layout) {
 
 //template<typename VTable, typename T>
 Layout drop_in_place(VTable, T)(VRefMut!(VTable) item_tree) {
+    writeln("Dropped item");
     (cast(T*)(item_tree.instance)).destroy();
     return vtable.Layout(T.sizeof, T.alignof);
 }

@@ -9,19 +9,18 @@ import slint.properties;
 //
 alias PropertyHandle = uintptr_t;
 
-/// Has the same layout as PropertyHandle
-struct PropertyHandleOpaque {
-    PropertyHandle _0;
-
-    // bool operator==(const PropertyHandleOpaque& other) const {
-    //     return _0 == other._0;
-    // }
-    // bool operator!=(const PropertyHandleOpaque& other) const {
-    //     return _0 != other._0;
-    // }
-}
-
 extern (C) {
+    /// Has the same layout as PropertyHandle
+    struct PropertyHandleOpaque {
+        PropertyHandle _0;
+
+        // bool operator==(const PropertyHandleOpaque& other) const {
+        //     return _0 == other._0;
+        // }
+        // bool operator!=(const PropertyHandleOpaque& other) const {
+        //     return _0 != other._0;
+        // }
+    }
     /// Opaque type representing the PropertyTracker
     struct PropertyTrackerOpaque {
         uintptr_t dependencies;

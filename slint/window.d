@@ -19,7 +19,7 @@ import slint.platform_internal;
 // using ItemTreeRc = vtable::VRc<ItemTreeVTable>;
 // using LogicalPosition;
 
-class WindowAdapterRc {
+extern (C++) class WindowAdapterRc {
 public:
     this(WindowAdapterRcOpaque adopted_inner) {
         assert_main_thread();

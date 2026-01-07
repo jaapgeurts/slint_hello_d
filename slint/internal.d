@@ -1,8 +1,12 @@
 module slint.internal;
 
+import phobos = std.algorithm.comparison;
 import std.traits;
 
+import core.stdc.stdint : uintptr_t, intptr_t, uint8_t, int32_t, uint32_t, uint64_t;
+
 import slint.brush_internal;
+import slint.builtin_structs_internal;
 import slint.color;
 import slint.enums_internal;
 import slint.enums;
@@ -16,8 +20,6 @@ import slint.string_internal;
 import slint.string;
 import slint.vtable;
 import slint.window;
-
-import core.stdc.stdint : uintptr_t, intptr_t, uint8_t, int32_t, uint32_t, uint64_t;
 
 enum TraversalOrder : uint8_t {
     BackToFront,
@@ -117,6 +119,8 @@ enum Clipboard : uint8_t {
     SelectionClipboard = 1,
 }
 
+struct ItemRendererRef;
+
 struct Option(T = void);
 
 alias VisitChildrenResult = uint64_t;
@@ -142,9 +146,84 @@ extern (C) {
         float preferred;
         /// the  stretch factor
         float stretch;
-        LayoutInfo merge(const ref LayoutInfo other) const;
+        void merge(ref const LayoutInfo other) {
+            // Note: This "logic" is duplicated from LayoutInfo::merge in layout.rs.
+            max = phobos.min(max, other.max);
+            max_percent = phobos.min(max_percent, other.max_percent);
+            min = phobos.max(min, other.min);
+            min_percent = phobos.max(min_percent, other.min_percent);
+            preferred = phobos.max(preferred, other.preferred);
+            stretch = phobos.min(stretch, other.stretch);
+        }
         // friend inline LayoutInfo operator+(const LayoutInfo &a, const LayoutInfo &b) { return a.merge(b); }
+        LayoutInfo opBinary(string op : "+")(ref const LayoutInfo rhs) {
+            this.merge(rhs);
+            return this;
+        }
         // friend bool operator==(const LayoutInfo&, const LayoutInfo&) = default;
+    }
+
+    /// This value is returned by the `input_event_filter_before_children` function, which
+    /// can specify how to further process the event.
+    /// See [`crate::items::ItemVTable::input_event_filter_before_children`].
+    struct InputEventFilterResult {
+        enum Tag {
+            /// The event is going to be forwarded to children, then the [`crate::items::ItemVTable::input_event`]
+            /// function is called
+            ForwardEvent,
+            /// The event will be forwarded to the children, but the [`crate::items::ItemVTable::input_event`] is not
+            /// going to be called for this item
+            ForwardAndIgnore,
+            /// Just like `ForwardEvent`, but even in the case that children grabs the mouse, this function
+            /// will still be called for further events
+            ForwardAndInterceptGrab,
+            /// The event will not be forwarded to children, if a child already had the grab, the
+            /// grab will be cancelled with a [`MouseEvent::Exit`] event
+            Intercept,
+            /// The event will be forwarded to the children with a delay (in milliseconds), unless it is
+            /// being intercepted.
+            /// This is what happens when the flickable wants to delay the event.
+            /// This should only be used for Press event, and the event will be sent after the delay, or
+            /// if a release event is seen before that delay
+            DelayForwarding,
+        }
+
+        struct DelayForwarding_Body {
+            uint64_t _0;
+        }
+
+        Tag tag;
+        union {
+            DelayForwarding_Body delay_forwarding;
+        }
+    }
+
+    /// This event is sent to a component and items when they receive or lose
+    /// the keyboard focus.
+    union FocusEvent {
+        enum Tag : uint8_t {
+            /// This event is sent when an item receives the focus.
+            FocusIn,
+            /// This event is sent when an item loses the focus.
+            FocusOut,
+        }
+
+        struct FocusIn_Body {
+            Tag tag;
+            FocusReason _0;
+        }
+
+        struct FocusOut_Body {
+            Tag tag;
+            FocusReason _0;
+        }
+
+        struct {
+            Tag tag;
+        }
+
+        FocusIn_Body focus_in;
+        FocusOut_Body focus_out;
     }
 
     /// Items are the nodes in the render tree.
@@ -163,25 +242,24 @@ extern (C) {
         /// Then, depending on the return value, it is called for the children, and their children, then
         /// [`Self::input_event`] is called on the children, and finally [`Self::input_event`] is called
         /// on this item again.
-        // TODO: enable later
-        // InputEventFilterResult function(Pin!(VRef!(ItemVTable)), const MouseEvent*,
-        //         const WindowAdapterRc* window_adapter, const ItemRc* self_rc) input_event_filter_before_children;
-        // /// Handle input event for mouse and touch event
-        // InputEventResult function(Pin!(VRef!(ItemVTable)), const MouseEvent*,
-        //         const WindowAdapterRc* window_adapter, const ItemRc* self_rc) input_event;
-        // FocusEventResult function(Pin!(VRef!(ItemVTable)), const FocusEvent*,
-        //         const WindowAdapterRc* window_adapter, const ItemRc* self_rc) focus_event;
-        // /// Called on the parents of the focused item, allowing for global shortcuts and similar
-        // /// overrides of the default actions.
-        // KeyEventResult function(Pin!(VRef!(ItemVTable)), const KeyEvent*,
-        //         const WindowAdapterRc* window_adapter, const ItemRc* self_rc) capture_key_event;
-        // KeyEventResult function(Pin!(VRef!(ItemVTable)), const KeyEvent*,
-        //         const WindowAdapterRc* window_adapter, const ItemRc* self_rc) key_event;
-        // RenderingResult function(Pin!(VRef!(ItemVTable)),
-        //         ItemRendererRef* backend, const ItemRc* self_rc, LogicalSize size) render;
-        // LogicalRect function(Pin!(VRef!(ItemVTable)),
-        //         const WindowAdapterRc* window_adapter, const ItemRc* self_rc, LogicalRect geometry) bounding_rect;
-        // bool function(Pin!(VRef!(ItemVTable))) clips_children;
+        InputEventFilterResult function(Pin!(VRef!(ItemVTable)), const MouseEvent*,
+                const WindowAdapterRc* window_adapter, const ItemRc* self_rc) input_event_filter_before_children;
+        /// Handle input event for mouse and touch event
+        InputEventResult function(Pin!(VRef!(ItemVTable)), const MouseEvent*,
+                const WindowAdapterRc* window_adapter, const ItemRc* self_rc) input_event;
+        FocusEventResult function(Pin!(VRef!(ItemVTable)), const FocusEvent*,
+                const WindowAdapterRc* window_adapter, const ItemRc* self_rc) focus_event;
+        /// Called on the parents of the focused item, allowing for global shortcuts and similar
+        /// overrides of the default actions.
+        KeyEventResult function(Pin!(VRef!(ItemVTable)), const KeyEvent*,
+                const WindowAdapterRc* window_adapter, const ItemRc* self_rc) capture_key_event;
+        KeyEventResult function(Pin!(VRef!(ItemVTable)), const KeyEvent*,
+                const WindowAdapterRc* window_adapter, const ItemRc* self_rc) key_event;
+        RenderingResult function(Pin!(VRef!(ItemVTable)),
+                ItemRendererRef* backend, const ItemRc* self_rc, LogicalSize size) render;
+        LogicalRect function(Pin!(VRef!(ItemVTable)),
+                const WindowAdapterRc* window_adapter, const ItemRc* self_rc, LogicalRect geometry) bounding_rect;
+        bool function(Pin!(VRef!(ItemVTable))) clips_children;
     }
 
     struct ItemVisitorVTable {
@@ -195,82 +273,6 @@ extern (C) {
                 Dyn)* item_tree, uint32_t index, Pin!(VRef!(ItemVTable)) item) visit_item;
         /// Destructor
         void function(VRefMut!(ItemVisitorVTable)) drop;
-    }
-    /// A ItemTree is representing an unit that is allocated together
-    struct ItemTreeVTable {
-        /// Visit the children of the item at index `index`.
-        /// Note that the root item is at index 0, so passing 0 would visit the item under root (the children of root).
-        /// If you want to visit the root item, you need to pass -1 as an index.
-        VisitChildrenResult function(Pin!(VRef!(ItemTreeVTable)), intptr_t index,
-                TraversalOrder order, VRefMut!(ItemVisitorVTable) visitor) visit_children_item;
-
-        /// Return a reference to an item using the given index
-        Pin!(VRef!(ItemVTable)) function(Pin!(VRef!(ItemTreeVTable)), uint32_t index) get_item_ref;
-
-        // TODO: enable later
-        /// Return the range of indices below the dynamic `ItemTreeNode` at `index`
-        // IndexRange function(Pin!(VRef!(ItemTreeVTable)), uint32_t index) get_subtree_range;
-        void* a;
-        /// Return the `ItemTreeRc` at `subindex` below the dynamic `ItemTreeNode` at `index`
-        void function(Pin!(VRef!(ItemTreeVTable)), uint32_t index,
-                uintptr_t subindex, VWeak!(ItemTreeVTable, Dyn)* result) get_subtree;
-        /// Return the item tree that is defined by this `ItemTree`.
-        Slice!(ItemTreeNode) function(Pin!(VRef!(ItemTreeVTable))) get_item_tree;
-
-        /// Return the node this ItemTree is a part of in the parent ItemTree.
-        ///
-        /// The return value is an item weak because it can be null if there is no parent.
-        /// And the return value is passed by &mut because ItemWeak has a destructor
-        /// Note that the returned value will typically point to a repeater node, which is
-        /// strictly speaking not an Item at all!
-        ///
-        void function(Pin!(VRef!(ItemTreeVTable)), ItemWeak* result) parent_node;
-        /// This embeds this ItemTree into the item tree of another ItemTree
-        ///
-        /// Returns `true` if this ItemTree was embedded into the `parent`
-        /// at `parent_item_tree_index`.
-        bool function(Pin!(VRef!(ItemTreeVTable)),
-                const VWeak!(ItemTreeVTable)* parent, uint32_t parent_item_tree_index) embed_component;
-        /// Return the index of the current subtree or usize::MAX if this is not a subtree
-        uintptr_t function(Pin!(VRef!(ItemTreeVTable))) subtree_index;
-        /// Returns the layout info for the root of the ItemTree
-        LayoutInfo function(Pin!(VRef!(ItemTreeVTable)), Orientation) layout_info;
-        /// Returns the item's geometry (relative to its parent item)
-
-        LogicalRect function(Pin!(VRef!(ItemTreeVTable)), uint32_t item_index) item_geometry;
-        /// Returns the accessible role for a given item
-        AccessibleRole function(Pin!(VRef!(ItemTreeVTable)), uint32_t item_index) accessible_role;
-        /// Returns the accessible property via the `result`. Returns true if such a property exists.
-        bool function(Pin!(VRef!(ItemTreeVTable)), uint32_t item_index,
-                AccessibleStringProperty what, SharedString* result) accessible_string_property;
-        // TODO: enable later
-        /// Executes an accessibility action.
-        // void function(Pin!(VRef!(ItemTreeVTable)), uint32_t item_index,
-        // const AccessibilityAction* action) accessibility_action;
-        void* b;
-        /// Returns the supported accessibility actions.
-        // SupportedAccessibilityAction function(Pin!(VRef!(ItemTreeVTable)), uint32_t item_index) supported_accessibility_actions;
-        void* c;
-
-        /// Add the `ElementName::id` entries of the given item
-        bool function(Pin!(VRef!(ItemTreeVTable)), uint32_t item_index, SharedString* result) item_element_infos;
-        /// Returns a Window, creating a fresh one if `do_create` is true.
-        void function(Pin!(VRef!(ItemTreeVTable)), bool do_create,
-                Option!(WindowAdapterRc)* result) window_adapter;
-        /// in-place destructor (for VRc)
-        Layout function(VRefMut!(ItemTreeVTable)) drop_in_place;
-        /// dealloc function (for VRc)
-        void function(const ItemTreeVTable*, uint8_t* ptr, Layout layout) dealloc;
-    }
-
-    /// Type alias to the commonly used VRc<ItemTreeVTable, Dyn>>
-    alias ItemTreeRc = VRc!(ItemTreeVTable, Dyn);
-
-    /// Same layout as WindowAdapterRc
-    struct WindowAdapterRcOpaque {
-        // TODO: these two values were const
-        void* _0;
-        void* _1;
     }
 
     /// A range of indices
@@ -338,6 +340,122 @@ extern (C) {
         uint32_t index;
     }
 
+    /// The argument of an accessible action.
+    union AccessibilityAction {
+        enum Tag : uint32_t {
+            Default,
+            Decrement,
+            Increment,
+            Expand,
+            /// This is currently unused
+            ReplaceSelectedText,
+            SetValue,
+        }
+
+        struct ReplaceSelectedText_Body {
+            Tag tag;
+            SharedString _0;
+        }
+
+        struct SetValue_Body {
+            Tag tag;
+            SharedString _0;
+        }
+
+        struct {
+            Tag tag;
+        }
+
+        ReplaceSelectedText_Body replace_selected_text;
+        SetValue_Body set_value;
+    }
+
+    /// Define a accessibility actions that supported by an item.
+    alias SupportedAccessibilityAction = uint32_t;
+    const SupportedAccessibilityAction SupportedAccessibilityAction_Default = cast(uint32_t) 1;
+    const SupportedAccessibilityAction SupportedAccessibilityAction_Decrement = cast(uint32_t)(
+            1 << 1);
+    const SupportedAccessibilityAction SupportedAccessibilityAction_Increment = cast(uint32_t)(
+            1 << 2);
+    const SupportedAccessibilityAction SupportedAccessibilityAction_Expand = cast(uint32_t)(1 << 3);
+    const SupportedAccessibilityAction SupportedAccessibilityAction_ReplaceSelectedText = cast(
+            uint32_t)(1 << 4);
+    const SupportedAccessibilityAction SupportedAccessibilityAction_SetValue = cast(uint32_t)(1 << 5);
+
+    /// A ItemTree is representing an unit that is allocated together
+    struct ItemTreeVTable {
+        /// Visit the children of the item at index `index`.
+        /// Note that the root item is at index 0, so passing 0 would visit the item under root (the children of root).
+        /// If you want to visit the root item, you need to pass -1 as an index.
+        VisitChildrenResult function(Pin!(VRef!(ItemTreeVTable)), intptr_t index,
+                TraversalOrder order, VRefMut!(ItemVisitorVTable) visitor) visit_children_item;
+
+        /// Return a reference to an item using the given index
+        Pin!(VRef!(ItemVTable)) function(Pin!(VRef!(ItemTreeVTable)), uint32_t index) get_item_ref;
+
+        /// Return the range of indices below the dynamic `ItemTreeNode` at `index`
+        IndexRange function(Pin!(VRef!(ItemTreeVTable)), uint32_t index) get_subtree_range;
+
+        /// Return the `ItemTreeRc` at `subindex` below the dynamic `ItemTreeNode` at `index`
+        void function(Pin!(VRef!(ItemTreeVTable)), uint32_t index,
+                uintptr_t subindex, VWeak!(ItemTreeVTable, Dyn)* result) get_subtree;
+        /// Return the item tree that is defined by this `ItemTree`.
+        Slice!(ItemTreeNode) function(Pin!(VRef!(ItemTreeVTable))) get_item_tree;
+
+        /// Return the node this ItemTree is a part of in the parent ItemTree.
+        ///
+        /// The return value is an item weak because it can be null if there is no parent.
+        /// And the return value is passed by &mut because ItemWeak has a destructor
+        /// Note that the returned value will typically point to a repeater node, which is
+        /// strictly speaking not an Item at all!
+        ///
+        void function(Pin!(VRef!(ItemTreeVTable)), ItemWeak* result) parent_node;
+        /// This embeds this ItemTree into the item tree of another ItemTree
+        ///
+        /// Returns `true` if this ItemTree was embedded into the `parent`
+        /// at `parent_item_tree_index`.
+        bool function(Pin!(VRef!(ItemTreeVTable)),
+                const VWeak!(ItemTreeVTable)* parent, uint32_t parent_item_tree_index) embed_component;
+        /// Return the index of the current subtree or usize::MAX if this is not a subtree
+        uintptr_t function(Pin!(VRef!(ItemTreeVTable))) subtree_index;
+        /// Returns the layout info for the root of the ItemTree
+        LayoutInfo function(Pin!(VRef!(ItemTreeVTable)), Orientation) layout_info;
+        /// Returns the item's geometry (relative to its parent item)
+
+        LogicalRect function(Pin!(VRef!(ItemTreeVTable)), uint32_t item_index) item_geometry;
+        /// Returns the accessible role for a given item
+        AccessibleRole function(Pin!(VRef!(ItemTreeVTable)), uint32_t item_index) accessible_role;
+        /// Returns the accessible property via the `result`. Returns true if such a property exists.
+        bool function(Pin!(VRef!(ItemTreeVTable)), uint32_t item_index,
+                AccessibleStringProperty what, SharedString* result) accessible_string_property;
+        /// Executes an accessibility action.
+        void function(Pin!(VRef!(ItemTreeVTable)), uint32_t item_index,
+                const AccessibilityAction* action) accessibility_action;
+
+        /// Returns the supported accessibility actions.
+        SupportedAccessibilityAction function(Pin!(VRef!(ItemTreeVTable)), uint32_t item_index) supported_accessibility_actions;
+
+        /// Add the `ElementName::id` entries of the given item
+        bool function(Pin!(VRef!(ItemTreeVTable)), uint32_t item_index, SharedString* result) item_element_infos;
+        /// Returns a Window, creating a fresh one if `do_create` is true.
+        void function(Pin!(VRef!(ItemTreeVTable)), bool do_create,
+                Option!(WindowAdapterRc)* result) window_adapter;
+        /// in-place destructor (for VRc)
+        Layout function(VRefMut!(ItemTreeVTable)) drop_in_place;
+        /// dealloc function (for VRc)
+        void function(const ItemTreeVTable*, uint8_t* ptr, Layout layout) dealloc;
+    }
+
+    /// Type alias to the commonly used VRc<ItemTreeVTable, Dyn>>
+    alias ItemTreeRc = VRc!(ItemTreeVTable, Dyn);
+
+    /// Same layout as WindowAdapterRc
+    struct WindowAdapterRcOpaque {
+        // TODO: these two values were const
+        void* _0;
+        void* _1;
+    }
+
     /// Alias for `vtable::VRef<ItemTreeVTable>` which represent a pointer to a `dyn ItemTree` with
     /// the associated vtable
     alias ItemTreeRef = VRef!(ItemTreeVTable);
@@ -356,6 +474,37 @@ extern (C) {
         uintptr_t cache_generation;
     }
 
+    struct EasingCurve {
+        enum Tag : uint32_t {
+            /// The linear curve
+            Linear,
+            /// A Cubic bezier curve, with its 4 parameters
+            CubicBezier,
+            /// Easing curve as defined at: <https://easings.net/#easeInElastic>
+            EaseInElastic,
+            /// Easing curve as defined at: <https://easings.net/#easeOutElastic>
+            EaseOutElastic,
+            /// Easing curve as defined at: <https://easings.net/#easeInOutElastic>
+            EaseInOutElastic,
+            /// Easing curve as defined at: <https://easings.net/#easeInBounce>
+            EaseInBounce,
+            /// Easing curve as defined at: <https://easings.net/#easeOutBounce>
+            EaseOutBounce,
+            /// Easing curve as defined at: <https://easings.net/#easeInOutBounce>
+            EaseInOutBounce,
+        }
+
+        struct CubicBezier_Body {
+            float[4] _0;
+        }
+
+        Tag tag;
+        union {
+            CubicBezier_Body cubic_bezier;
+        }
+        // constexpr EasingCurve(EasingCurve.Tag tag = Tag.Linear, float a = 0, float b = 0, float c = 1, float d = 1) : tag(tag), cubic_bezier{{a,b,c,d}} {}
+    }
+
     /// The implementation of the `PropertyAnimation` element
     struct PropertyAnimation {
         int32_t delay;
@@ -363,7 +512,7 @@ extern (C) {
         float iteration_count;
         AnimationDirection direction;
         // TODO: Enable later
-        // EasingCurve easing;
+        EasingCurve easing;
     }
 
     /// 2D Size in integer coordinates
@@ -588,10 +737,9 @@ extern (C) {
     void slint_register_item_tree(const ItemTreeRc* item_tree_rc,
             const WindowAdapterRcOpaque* window_handle);
 
-    // TODO: enable later
-    // /// Free the backend graphics resources allocated in the item array.
-    // void slint_unregister_item_tree(ItemTreeRefPin component, Slice!(VOffset!(uint8_t,
-    //         ItemVTable, AllowPin)) item_array, const WindowAdapterRcOpaque* window_handle);
+    /// Free the backend graphics resources allocated in the item array.
+    void slint_unregister_item_tree(ItemTreeRefPin component, Slice!(VOffset!(uint8_t,
+            ItemVTable, AllowPin)) item_array, const WindowAdapterRcOpaque* window_handle);
 
     /// Expose `crate::item_tree::visit_item_tree` to C++
     ///

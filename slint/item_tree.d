@@ -25,9 +25,9 @@ ItemTreeNode make_dyn_node(uint32_t offset, uint32_t parent_index) {
 
 ItemRef get_item_ref(ItemTreeRef item_tree,
         const Slice!(ItemTreeNode) item_tree_array, const ItemArray item_array, int index) {
-    const auto item_array_index = item_tree_array.ptr[index].item.item_array_index;
+    const auto item_array_index = item_tree_array[index].item.item_array_index;
     const auto item = item_array[item_array_index];
-    return ItemRef(item.vtable, cast(ubyte*)(item_tree.instance) + item.offset);
+    return ItemRef(item.vtable, cast(ubyte*) item_tree.instance + item.offset);
 }
 
 /// The component handle is like a shared pointer to a component in the generated code.

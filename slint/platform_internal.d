@@ -4,6 +4,7 @@ import core.stdc.stdint : uintptr_t, intptr_t, uint8_t, uint16_t, int32_t, uint3
 
 /* Generated with cbindgen:0.29.2 */
 
+import slint.brush_internal;
 import slint.internal;
 import slint.size;
 import slint.point;
@@ -54,9 +55,8 @@ struct DrawRectangleArgs {
     float bottom_right_radius;
     float bottom_left_radius;
     float border_width;
-    // TODO: enable later
-    // Brush background;
-    // Brush border;
+    Brush background;
+    Brush border;
     uint8_t alpha;
     /// 0, 90, 180, or 270
     int32_t rotation;

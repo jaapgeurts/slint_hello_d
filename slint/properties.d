@@ -105,11 +105,23 @@ extern (C) struct Property(T) {
         return value;
     }
 
+    //void slint_property_set_binding(
+    //         const PropertyHandleOpaque* handle,
+    //         void function(void* user_data, void* pointer_to_value) binding,
+    //         void* user_data,
+    //         void function(void*) drop_user_data,
+    //         bool function(void* user_data, const void* pointer_to_value) intercept_set,
+    //         bool function(void* user_data, void* new_binding) intercept_set_binding
+    // );
+
     void set_binding(F)(F binding) const {
+        static extern (C) void g(void* user_data, void* value) {
+            *(cast(T*) value) = (cast(F) user_data)();
+        }
+
         writeln("Property.set_binding() called");
-        slint_property_set_binding(&inner, (void* user_data, void* value) {
-            *cast(T*)(value) = (*cast(F*)(user_data))();
-        }, new F(binding), (void* user_data) { delete cast(F*)(user_data); }, nullptr, nullptr);
+
+        slint_property_set_binding(&inner, &g, cast(void*) binding, null, null, null);
     }
 
     // TODO: check if PropertyAnimation == struct or class.

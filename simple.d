@@ -35,31 +35,66 @@ import slint.brush_internal;
 // alias ItemArrayEntry = VOffset!(uint8_t, ItemVTable, AllowPin);
 // alias ItemArray = Slice!(ItemArrayEntry);
 
-pragma(mangle, "WindowItemVTable") extern __gshared const(ItemVTable) WindowItemVTable;
+pragma(mangle, "BasicBorderRectangleVTable") extern __gshared const(ItemVTable) BasicBorderRectangleVTable;
+pragma(mangle, "BorderRectangleVTable") extern __gshared const(ItemVTable) BorderRectangleVTable;
+pragma(mangle, "BoxShadowVTable") extern __gshared const(ItemVTable) BoxShadowVTable;
+pragma(mangle, "ClippedImageVTable") extern __gshared const(ItemVTable) ClippedImageVTable;
+pragma(mangle, "ClipVTable") extern __gshared const(ItemVTable) ClipVTable;
+pragma(mangle, "ComplexTextVTable") extern __gshared const(ItemVTable) ComplexTextVTable;
+pragma(mangle, "ComponentContainerVTable") extern __gshared const(ItemVTable) ComponentContainerVTable;
+pragma(mangle, "ContextMenuVTable") extern __gshared const(ItemVTable) ContextMenuVTable;
+pragma(mangle, "DragAreaVTable") extern __gshared const(ItemVTable) DragAreaVTable;
+pragma(mangle, "DropAreaVTable") extern __gshared const(ItemVTable) DropAreaVTable;
+pragma(mangle, "EmptyVTable") extern __gshared const(ItemVTable) EmptyVTable;
+pragma(mangle, "FlickableVTable") extern __gshared const(ItemVTable) FlickableVTable;
+pragma(mangle, "FocusScopeVTable") extern __gshared const(ItemVTable) FocusScopeVTable;
+pragma(mangle, "ImageItemVTable") extern __gshared const(ItemVTable) ImageItemVTable;
+pragma(mangle, "LayerVTable") extern __gshared const(ItemVTable) LayerVTable;
+pragma(mangle, "MarkdownTextVTable") extern __gshared const(ItemVTable) MarkdownTextVTable;
+pragma(mangle, "MenuItemVTable") extern __gshared const(ItemVTable) MenuItemVTable;
+pragma(mangle, "NativeButtonVTable") extern __gshared const(ItemVTable) NativeButtonVTable;
+pragma(mangle, "NativeCheckBoxVTable") extern __gshared const(ItemVTable) NativeCheckBoxVTable;
+pragma(mangle, "NativeComboBoxPopupVTable") extern __gshared const(ItemVTable) NativeComboBoxPopupVTable;
+pragma(mangle, "NativeComboBoxVTable") extern __gshared const(ItemVTable) NativeComboBoxVTable;
+pragma(mangle, "NativeGroupBoxVTable") extern __gshared const(ItemVTable) NativeGroupBoxVTable;
+pragma(mangle, "NativeLineEditVTable") extern __gshared const(ItemVTable) NativeLineEditVTable;
+pragma(mangle, "NativeProgressIndicatorVTable") extern __gshared const(ItemVTable) NativeProgressIndicatorVTable;
+pragma(mangle, "NativeScrollViewVTable") extern __gshared const(ItemVTable) NativeScrollViewVTable;
+pragma(mangle, "NativeSliderVTable") extern __gshared const(ItemVTable) NativeSliderVTable;
+pragma(mangle, "NativeSpinBoxVTable") extern __gshared const(ItemVTable) NativeSpinBoxVTable;
+pragma(mangle, "NativeStandardListViewItemVTable") extern __gshared const(ItemVTable) NativeStandardListViewItemVTable;
+pragma(mangle, "NativeTableHeaderSectionVTable") extern __gshared const(ItemVTable) NativeTableHeaderSectionVTable;
+pragma(mangle, "NativeTabVTable") extern __gshared const(ItemVTable) NativeTabVTable;
+pragma(mangle, "NativeTabWidgetVTable") extern __gshared const(ItemVTable) NativeTabWidgetVTable;
+pragma(mangle, "OpacityVTable") extern __gshared const(ItemVTable) OpacityVTable;
+pragma(mangle, "PathVTable") extern __gshared const(ItemVTable) PathVTable;
+pragma(mangle, "RectangleVTable") extern __gshared const(ItemVTable) RectangleVTable;
 pragma(mangle, "SimpleTextVTable") extern __gshared const(ItemVTable) SimpleTextVTable;
+pragma(mangle, "SwipeGestureHandlerVTable") extern __gshared const(ItemVTable) SwipeGestureHandlerVTable;
+pragma(mangle, "TextInputVTable") extern __gshared const(ItemVTable) TextInputVTable;
+pragma(mangle, "TouchAreaVTable") extern __gshared const(ItemVTable) TouchAreaVTable;
+pragma(mangle, "TransformVTable") extern __gshared const(ItemVTable) TransformVTable;
+pragma(mangle, "WindowItemVTable") extern __gshared const(ItemVTable) WindowItemVTable;
 
 VWeak!(ItemTreeVTable, Dyn) root_weak;
 Window window;
 
-Property!LayoutInfo root_1_layoutinfo_v;
-Property!LayoutInfo root_1_layoutinfo_h;
-
-static this() {
-    root_1_layoutinfo_v.initialize();
-    root_1_layoutinfo_h.initialize();
-
-}
+// Property!LayoutInfo root_1_layoutinfo_v;
+// Property!LayoutInfo root_1_layoutinfo_h;
+//
+// static this() {
+//     root_1_layoutinfo_v.initialize();
+//     root_1_layoutinfo_h.initialize();
+//
+// }
 
 extern (C) struct MainWindow {
 
     WindowItem root_1;
     SimpleText text_2;
 
-    // TODO: stop this nonsens
-    // __gshared const ItemTreeVTable static_vtable =
-    //     ItemTreeVTable(&visit_children, &get_item_ref, null, null,
-    //         &get_item_tree, null, null, null, &layout_info, &item_geometry,
-    //         null, null, null, null, null, &window_adapter, null, &dealloc);
+    // TODO: stop this nonsense
+    // inline const slint::private_api::ItemTreeVTable MainWindow::static_vtable = { visit_children, get_item_ref, get_subtree_range, get_subtree, get_item_tree, parent_node, embed_component, subtree_index, layout_info, item_geometry, accessible_role, accessible_string_property, accessibility_action, supported_accessibility_actions, element_infos, window_adapter, slint::private_api::drop_in_place<MainWindow>, slint::private_api::dealloc };
     __gshared const ItemTreeVTable static_vtable = ItemTreeVTable(&visit_children,
             &get_item_ref, &get_subtree_range, &get_subtree,
             &get_item_tree, &parent_node, &embed_component, &subtree_index, &layout_info, &item_geometry,
@@ -92,7 +127,9 @@ extern (C) struct MainWindow {
     }
 
     static LayoutInfo layout_info(ItemTreeRef component, Orientation o) {
-        return o == Orientation.Horizontal ? root_1_layoutinfo_h.get() : root_1_layoutinfo_v.get();
+        // return o == Orientation.Horizontal ? root_1_layoutinfo_h.get() : root_1_layoutinfo_v.get();
+        // writeln("Request layout info");
+        return LayoutInfo();
     }
 
     static Rect item_geometry(ItemTreeRef component, uint32_t index) {
@@ -100,10 +137,12 @@ extern (C) struct MainWindow {
         auto mw = cast(MainWindow*) ci;
         switch (index) {
         case 0:
+            writeln("Rect for Window");
             return Rect(0, 0, mw.root_1.width.get(), mw.root_1.height.get(),);
         case 1:
-            return Rect(0, 0, mw.text_2.width.get(), mw.text_2.height.get());
+            return Rect(10, 10, mw.text_2.width.get(), mw.text_2.height.get());
         default:
+            writeln("'Rect for default'");
             return Rect.init;
         }
     }
@@ -126,7 +165,7 @@ extern (C) struct MainWindow {
         auto sw = root_weak;
         // auto self_rc = sw.lock().get.into_dyn();
         auto self_rc = new VRc!(ItemTreeVTable, Dyn)(sw.inner);
-        writeln("TreeItem visit");
+        writeln("TreeItem '", index, "' visit");
         return slint_visit_item_tree(self_rc, get_item_tree(component), index,
                 order, visitor, dyn_visit);
     }
@@ -193,15 +232,25 @@ void CreateWindow() {
     writeln("Offset of: ", WindowItem.default_font_family.offsetof);
 
     self_rc.inner.data.root_1.title.set(SharedString("Slint D Demo"));
-    self_rc.inner.data.root_1.width.set(100);
-    self_rc.inner.data.root_1.height.set(100);
+    self_rc.inner.data.root_1.width.set(800);
+    self_rc.inner.data.root_1.height.set(600);
     self_rc.inner.data.root_1.background.set(
-            Brush.SolidColor(Color.from_argb_uint8(0xff, 0xff, 0x20, 0x20)));
+            Brush.SolidColor(Color.from_argb_uint8(0xff, 0xe0, 0xe0, 0xe0)));
+    // self_rc.inner.data.root_1.default_font_family.set(SharedString("Vollkorn"));
+    // self_rc.inner.data.root_1.default_font_size.set(12);
 
     self_rc.inner.data.text_2.text.set(SharedString("hello world"));
-    self_rc.inner.data.text_2.width.set(100);
-    self_rc.inner.data.text_2.height.set(100);
-    // self_rc.inner.data.text_2.font_size.set(12);
+    self_rc.inner.data.text_2.width.set(90);
+    self_rc.inner.data.text_2.height.set(30);
+    // self_rc.inner.data.text_2.width.set_binding(() => 90);
+    // self_rc.inner.data.text_2.height.set_binding(() => 30);
+    self_rc.inner.data.text_2.color.set(Brush.SolidColor(Color.from_argb_uint8(0xff,
+            0x20, 0x20, 0x20)));
+
+    self_rc.inner.data.text_2.font_size.set(18);
+
+    self_rc.inner.data.root_1.resize_border_width.set(2);
+    self_rc.inner.data.root_1.default_font_size.set(18);
 
     //void slint_register_item_tree(const ItemTreeRc* item_tree_rc,const WindowAdapterRcOpaque* window_handle);
     slint_register_item_tree(item_tree_rc, window_handle);
@@ -210,6 +259,21 @@ void CreateWindow() {
     auto vweak = VWeak!(ItemTreeVTable, MainWindow)(self_rc);
     root_weak = *cast(VWeak!(ItemTreeVTable, Dyn)*) cast(void*)&vweak;
     window.window_handle().set_component(root_weak);
+    auto wh = window.window_handle(); // risky
+
+    // LayoutInfo a1 = item_layout_info(&WindowItemVTable, &self_rc.inner.data.root_1,
+    //         Orientation.Horizontal, wh, item_tree_rc, // self->self_weak.lock()->into_dyn(),
+    //         cast(uint32_t) 0);
+    // LayoutInfo a2 = item_layout_info(&SimpleTextVTable, &self_rc.inner.data.text_2,
+    //         Orientation.Horizontal, wh, item_tree_rc, cast(uint32_t) 1);
+    // root_1_layoutinfo_h.set(a1 + a2);
+    //
+    // LayoutInfo b1 = item_layout_info(&WindowItemVTable, &self_rc.inner.data.root_1,
+    //         Orientation.Vertical, wh, item_tree_rc, // self->self_weak.lock()->into_dyn(),
+    //         cast(uint32_t) 0);
+    // LayoutInfo b2 = item_layout_info(&SimpleTextVTable, &self_rc.inner.data.text_2,
+    //         Orientation.Vertical, wh, item_tree_rc, cast(uint32_t) 1);
+    // root_1_layoutinfo_v.set(b1 + b2);
 
     window.show();
     run_event_loop();
