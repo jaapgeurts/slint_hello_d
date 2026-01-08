@@ -6,7 +6,7 @@ import core.stdc.stdint : uint32_t;
 
 /// The Size structure is used to represent a two-dimensional size
 /// with width and height.
-struct Size(T) {
+extern (C) struct Size(T) {
     /// The width of the size
     T width;
     /// The height of the size

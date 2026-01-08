@@ -105,7 +105,7 @@ extern (C) struct MainWindow {
     // ItemTreeVTable( visit_children, get_item_ref, get_subtree_range, get_subtree, get_item_tree, parent_node, embed_component, subtree_index, layout_info, item_geometry, accessible_role, accessible_string_property, accessibility_action, supported_accessibility_actions, element_infos, window_adapter, drop_in_place<MainWindow>, dealloc );
 
     static Slice!(ItemTreeNode) get_item_tree(ItemTreeRef component) {
-        // writeln("callback: item_tree()");
+        writeln("callback: get_item_tree()");
         static const ItemTreeNode[] children = [
             make_item_node(1, 1, 0, 0, false), make_item_node(0, 2, 0, 1, false)
         ];
@@ -114,13 +114,13 @@ extern (C) struct MainWindow {
     }
 
     static ItemRef get_item_ref(ItemTreeRef component, uint32_t index) {
-        // writeln("callback: get_item_ref");
+        writeln("callback: get_item_ref");
         auto it = get_item_tree(component);
         return slint.item_tree.get_item_ref(component, it, item_array(), index);
     }
 
     static const(ItemArray) item_array() {
-        static ItemArrayEntry[] items = [
+        static const ItemArrayEntry[] items = [
             // TODO: fix later
             {&WindowItemVTable, MainWindow.root_1.offsetof},
             {&SimpleTextVTable, MainWindow.text_2.offsetof}
@@ -176,9 +176,9 @@ extern (C) struct MainWindow {
             Option!(WindowAdapterRc)* result) {
         // auto ci = component.instance;
         // auto mw = cast(MainWindow*) ci;
-        // TODO: is there a better way to copy this?
-        *(cast(WindowAdapterRcOpaque*) result) = *cast(WindowAdapterRcOpaque*) window.window_handle()
-            .handle();
+        // TODO: returning this window handle crashes the window
+        // *(cast(WindowAdapterRcOpaque*) result) = *(
+        //         cast(WindowAdapterRcOpaque*) window.window_handle().handle());
 
     }
 
@@ -235,6 +235,18 @@ void CreateWindow() {
     writeln("Align  of: ", WindowItem.default_font_family.alignof);
     writeln("Offset of: ", WindowItem.default_font_family.offsetof);
     writefln("WindomItemVTable: %s", &WindowItemVTable);
+    writeln("Sizeof            bool: ", bool.sizeof);
+    writeln("Sizeof       uintptr_t: ", uintptr_t.sizeof);
+    writeln("Sizeof           float: ", float.sizeof);
+    writeln("Sizeof      WindowItem: ", WindowItem.sizeof);
+    writeln("Sizeof      SimpleText: ", SimpleText.sizeof);
+    writeln("Sizeof         self_rc: ", self_rc.sizeof);
+    writeln("Sizeof WindowAdapterRc: ", WindowAdapterRc.sizeof);
+    writeln("Sizeof WindowAdapterRcOpaque: ", WindowAdapterRcOpaque.sizeof);
+    writeln("Sizeof VRc!(ItemTreeVTable, MainWindow): ", VRc!(ItemTreeVTable, MainWindow).sizeof);
+    writeln("Sizeof VRcInner!(ItemTreeVTable, MainWindow): ",
+            VRcInner!(ItemTreeVTable, MainWindow).sizeof);
+    writeln("Sizeof       ItemArray: ", ItemArray.sizeof);
 
     self_rc.inner.data.root_1.title.set(SharedString("Slint D Demo"));
     self_rc.inner.data.root_1.width.set(800);

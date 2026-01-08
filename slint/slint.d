@@ -25,7 +25,7 @@ import slint.timer;
 // /// \endrst
 //
 // /// Convert a slint `{height: length, width: length, x: length, y: length}` to a Rect
-// JG: Why so complex? Convert 4 values to a tuple first only to unpack them in a rect
+// JG: Why so complex? Convert 4 values to a tuple first, only to unpack them in a rect
 // inline cbindgen_private::Rect convert_anonymous_rect(std::tuple<float, float, float, float> tuple)
 // {
 //     // alphabetical order
@@ -41,6 +41,9 @@ import slint.timer;
 //
 // template<typename T>
 extern (C) Layout drop_in_place(T)(ItemTreeRef item_tree) {
+    import std.stdio;
+
+    writeln("Item dropped");
     return slint.vtable.drop_in_place!(ItemTreeVTable, T)(item_tree);
 }
 //

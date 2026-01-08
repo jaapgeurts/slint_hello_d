@@ -12,13 +12,14 @@ import slint.internal;
 import slint.color;
 import slint.image;
 
-template PropertyCallback(T) {
-    alias PropertyCallback = extern (C) void function(void*, T*);
+extern (C) {
+    template PropertyCallback(T) {
+        alias PropertyCallback = void function(void*, T*);
+    }
+
+    alias DropUserDataCallback = void function(void*);
+    alias TransitionDataCallback = PropertyAnimation function(void*, uint64_t*);
 }
-
-alias DropUserDataCallback = extern (C) void function(void*);
-alias TransitionDataCallback = extern (C) PropertyAnimation function(void*, uint64_t*);
-
 void slint_property_set_animated_binding_helper(const PropertyHandleOpaque* handle,
         PropertyCallback!int binding, void* user_data,
         DropUserDataCallback drop_user_data, const PropertyAnimation* animation_data,

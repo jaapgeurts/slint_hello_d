@@ -19,7 +19,7 @@ import slint.platform_internal;
 alias Size = Size2D!(float);
 
 /// a Repr(C) variant of slint::platform::LayoutConstraints
-struct LayoutConstraintsReprC {
+extern (C) struct LayoutConstraintsReprC {
     Size min;
     Size max;
     Size preferred;

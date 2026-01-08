@@ -6,12 +6,12 @@ import core.stdc.stdint : int32_t;
 
 /// The Point structure is used to represent a two-dimensional point
 /// with x and y coordinates.
-struct Point(T) {
+
+extern (C) struct Point(T) {
     /// The x coordinate of the point
     T x;
     /// The y coordinate of the point
     T y;
-
     /// Compares with \a other and returns true if they are equal; false otherwise.
     // bool operator==(const Point &other) const = default;
 }

@@ -7,6 +7,7 @@ import std.typecons;
 import std.stdio;
 
 import core.atomic;
+import core.memory;
 import core.lifetime;
 import core.stdc.stdint : uint8_t, uintptr_t;
 import core.stdc.stdlib;
@@ -55,8 +56,8 @@ extern (C) {
         }
         // TODO: review if we must use the 'shared' keyword for strong_ref and weak_ref
         // and make operation on it atomic
-        int strong_ref = 100;
-        int weak_ref = 100;
+        int strong_ref = 1;
+        int weak_ref = 1;
 
         ushort data_offset = VRcInner!(VTable, X).data.offsetof;
         union {
@@ -65,8 +66,10 @@ extern (C) {
         }
 
         void* data_ptr() {
-            // TODO: simplify after it works
-            return (cast(ubyte*)(&this)) + data_offset;
+            writeln("data_ptr() called");
+            return &data;
+            // TODO: remove after it works
+            // return (cast(ubyte*)(&this)) + data_offset;
         }
     }
 
@@ -87,7 +90,6 @@ extern (C) {
         this(VRc!(VTable, X)* other) {
             writeln("VRc copy constructor called");
             this.inner = other.inner;
-            // other.string_ref++;
         }
 
     public:
@@ -117,8 +119,8 @@ extern (C) {
             writeln("VRc.opAssign() called");
             if (inner == other.inner)
                 return;
-            this.inner = other.inner;
-            this.inner.strong_ref++;
+            this = other;
+
         }
         /// Construct a new VRc holding an X.
         ///
@@ -144,6 +146,7 @@ extern (C) {
             enum align_ = VRcInner!(VTable, X).alignof;
 
             auto mem = aligned_alloc(align_, size);
+            GC.addRoot(mem);
             assert(mem !is null);
 
             // auto inner = cast(VRcInner!(VTable, X)*) mem;
@@ -185,6 +188,7 @@ extern (C) {
         // const X &operator*() const { return inner->data; }
         // X &operator*() { return inner->data; }
         ref X data() {
+            writeln("VRc.data() called");
             return inner.data;
         }
 
@@ -207,7 +211,7 @@ extern (C) {
 
     public:
         // VWeak(const VWeak &other) : inner(other.inner) { inner && inner->weak_ref++; }
-        // TODO: change this. Reference counting this way is not very D like
+        // TODO: change this. Reference counting. This way is not very D like
         this(ref VRc!(VTable, X) other) {
             this.inner = other.inner;
             if (inner)
@@ -215,6 +219,7 @@ extern (C) {
         }
 
         ~this() {
+            writeln("VWeak destructed");
             // if (inner)
             //     inner.weak_ref--;
             // if (inner && !--inner.weak_ref) {
@@ -231,6 +236,7 @@ extern (C) {
         // }
         //
         Nullable!(VRc!(VTable, X)) lock() {
+            writeln("Lock called");
             if (!inner || inner.strong_ref == 0)
                 return Nullable!(VRc!(VTable, X)).init;
             inner.strong_ref++;
@@ -252,6 +258,7 @@ extern (C) {
 
 void vtable_dealloc(VTable)(const VTable*, uint8_t* ptr, Layout layout) {
     // GLibC allows aligned memory to be released with free()
+    GC.removeRoot(ptr);
     free(cast(void*) ptr);
 }
 

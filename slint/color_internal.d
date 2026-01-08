@@ -20,27 +20,28 @@ import slint.enums_internal;
 ///
 /// let new_col = Color::from(RgbaColor{ red: 0.5, green: 0.65, blue: 0.32, alpha: 1.});
 /// ```
-struct ColorInner {
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-    uint8_t alpha;
-
-    // bool operator==(const Color& other) const {
-    //     return red == other.red &&
-    //            green == other.green &&
-    //            blue == other.blue &&
-    //            alpha == other.alpha;
-    // }
-    // bool operator!=(const Color& other) const {
-    //     return red != other.red ||
-    //            green != other.green ||
-    //            blue != other.blue ||
-    //            alpha != other.alpha;
-    // }
-}
 
 extern (C) {
+
+    struct ColorInner {
+        uint8_t red;
+        uint8_t green;
+        uint8_t blue;
+        uint8_t alpha;
+
+        // bool operator==(const Color& other) const {
+        //     return red == other.red &&
+        //            green == other.green &&
+        //            blue == other.blue &&
+        //            alpha == other.alpha;
+        // }
+        // bool operator!=(const Color& other) const {
+        //     return red != other.red ||
+        //            green != other.green ||
+        //            blue != other.blue ||
+        //            alpha != other.alpha;
+        // }
+    }
 
     void slint_color_brighter(const ColorInner* col, float factor, ColorInner* out_);
 

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
 module slint.timer;
 
+import std.stdio;
+
 // cSpell: ignore singleshot
 
 /// Internal function that checks that the API that must be called from the main
@@ -10,6 +12,7 @@ module slint.timer;
 /// Most API should be called from the main thread. When using thread one must
 /// use slint::invoke_from_event_loop
 void assert_main_thread() {
+    writeln("assert_main_thread() called");
     // TODO: enable later
     // static auto main_thread_id = std::this_thread::get_id();
     // if (main_thread_id != std::this_thread::get_id()) {

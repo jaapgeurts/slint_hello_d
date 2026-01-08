@@ -10,6 +10,7 @@ import slint.color_internal;
 /// with the precision of the template parameter T. For example if T is float,
 /// the values are normalized between 0 and 1. If T is uint8_t, they values range
 /// is 0 to 255.
+
 struct RgbaColor(T) {
     /// The alpha component.
     T alpha;

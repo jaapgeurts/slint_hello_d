@@ -157,6 +157,7 @@ extern (C) {
         }
         // friend inline LayoutInfo operator+(const LayoutInfo &a, const LayoutInfo &b) { return a.merge(b); }
         LayoutInfo opBinary(string op : "+")(ref const LayoutInfo rhs) {
+            // TODO: review
             this.merge(rhs);
             return this;
         }
@@ -243,22 +244,23 @@ extern (C) {
         /// [`Self::input_event`] is called on the children, and finally [`Self::input_event`] is called
         /// on this item again.
         InputEventFilterResult function(Pin!(VRef!(ItemVTable)), const MouseEvent*,
-                const WindowAdapterRc* window_adapter, const ItemRc* self_rc) input_event_filter_before_children;
+                const WindowAdapterRcOpaque* window_adapter, const ItemRc* self_rc) input_event_filter_before_children;
         /// Handle input event for mouse and touch event
         InputEventResult function(Pin!(VRef!(ItemVTable)), const MouseEvent*,
-                const WindowAdapterRc* window_adapter, const ItemRc* self_rc) input_event;
+                const WindowAdapterRcOpaque* window_adapter, const ItemRc* self_rc) input_event;
         FocusEventResult function(Pin!(VRef!(ItemVTable)), const FocusEvent*,
-                const WindowAdapterRc* window_adapter, const ItemRc* self_rc) focus_event;
+                const WindowAdapterRcOpaque* window_adapter, const ItemRc* self_rc) focus_event;
         /// Called on the parents of the focused item, allowing for global shortcuts and similar
         /// overrides of the default actions.
         KeyEventResult function(Pin!(VRef!(ItemVTable)), const KeyEvent*,
-                const WindowAdapterRc* window_adapter, const ItemRc* self_rc) capture_key_event;
+                const WindowAdapterRcOpaque* window_adapter, const ItemRc* self_rc) capture_key_event;
         KeyEventResult function(Pin!(VRef!(ItemVTable)), const KeyEvent*,
-                const WindowAdapterRc* window_adapter, const ItemRc* self_rc) key_event;
+                const WindowAdapterRcOpaque* window_adapter, const ItemRc* self_rc) key_event;
         RenderingResult function(Pin!(VRef!(ItemVTable)),
                 ItemRendererRef* backend, const ItemRc* self_rc, LogicalSize size) render;
         LogicalRect function(Pin!(VRef!(ItemVTable)),
-                const WindowAdapterRc* window_adapter, const ItemRc* self_rc, LogicalRect geometry) bounding_rect;
+                const WindowAdapterRcOpaque* window_adapter,
+                const ItemRc* self_rc, LogicalRect geometry) bounding_rect;
         bool function(Pin!(VRef!(ItemVTable))) clips_children;
     }
 
@@ -458,10 +460,10 @@ extern (C) {
 
     /// Alias for `vtable::VRef<ItemTreeVTable>` which represent a pointer to a `dyn ItemTree` with
     /// the associated vtable
-    alias ItemTreeRef = VRef!(ItemTreeVTable);
+    alias ItemTreeRef = VRef!ItemTreeVTable;
 
     /// Type alias to the commonly used `Pin<VRef<ItemTreeVTable>>>`
-    alias ItemTreeRefPin = Pin!(ItemTreeRef);
+    alias ItemTreeRefPin = Pin!ItemTreeRef;
 
     /// This structure must be present in items that are Rendered and contains information.
     /// Used by the backend.
