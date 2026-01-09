@@ -105,7 +105,7 @@ extern (C) struct MainWindow {
     // ItemTreeVTable( visit_children, get_item_ref, get_subtree_range, get_subtree, get_item_tree, parent_node, embed_component, subtree_index, layout_info, item_geometry, accessible_role, accessible_string_property, accessibility_action, supported_accessibility_actions, element_infos, window_adapter, drop_in_place<MainWindow>, dealloc );
 
     static Slice!(ItemTreeNode) get_item_tree(ItemTreeRef component) {
-        writeln("callback: get_item_tree()");
+        // writeln("callback: get_item_tree()");
         static const ItemTreeNode[] children = [
             make_item_node(1, 1, 0, 0, false), make_item_node(0, 2, 0, 1, false)
         ];
@@ -114,7 +114,7 @@ extern (C) struct MainWindow {
     }
 
     static ItemRef get_item_ref(ItemTreeRef component, uint32_t index) {
-        writeln("callback: get_item_ref");
+        // writeln("callback: get_item_ref");
         auto it = get_item_tree(component);
         return slint.item_tree.get_item_ref(component, it, item_array(), index);
     }
@@ -139,7 +139,6 @@ extern (C) struct MainWindow {
         auto mw = cast(MainWindow*) ci;
         switch (index) {
         case 0:
-            writeln("Rect for Window");
             return Rect(0, 0, mw.root_1.width.get(), mw.root_1.height.get(),);
         case 1:
             return Rect(10, 10, mw.text_2.width.get(), mw.text_2.height.get());
@@ -172,16 +171,14 @@ extern (C) struct MainWindow {
                 order, visitor, dyn_visit);
     }
 
-    static void window_adapter(ItemTreeRef component, bool do_create,
-            Option!(WindowAdapterRc)* result) {
+    static void window_adapter(ItemTreeRef component, bool do_create, WindowAdapterRc* result) {
         // auto ci = component.instance;
         // auto mw = cast(MainWindow*) ci;
         // TODO: returning this window handle crashes the window
-        // *(cast(WindowAdapterRcOpaque*) result) = *(
-        //         cast(WindowAdapterRcOpaque*) window.window_handle().handle());
+        *result = *window.window_handle();
 
     }
-
+    //
     static void dealloc(const ItemTreeVTable* vtable, uint8_t* ptr, Layout layout) {
         // vtable_dealloc(vtable, ptr, layout);
         writeln("Request deletion of an item");
@@ -272,7 +269,9 @@ void CreateWindow() {
     //void slint_register_item_tree(const ItemTreeRc* item_tree_rc,const WindowAdapterRcOpaque* window_handle);
     slint_register_item_tree(item_tree_rc, window_handle);
 
-    window = new Window(new WindowAdapterRc());
+    WindowAdapterRc warc;
+    warc.initialize();
+    window = new Window(&warc);
     auto vweak = VWeak!(ItemTreeVTable, MainWindow)(self_rc);
     root_weak = *cast(VWeak!(ItemTreeVTable, Dyn)*) cast(void*)&vweak;
     window.window_handle().set_component(root_weak);

@@ -12,7 +12,6 @@ import std.stdio;
 /// Most API should be called from the main thread. When using thread one must
 /// use slint::invoke_from_event_loop
 void assert_main_thread() {
-    writeln("assert_main_thread() called");
     // TODO: enable later
     // static auto main_thread_id = std::this_thread::get_id();
     // if (main_thread_id != std::this_thread::get_id()) {

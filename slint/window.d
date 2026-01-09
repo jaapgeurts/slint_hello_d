@@ -26,7 +26,7 @@ public:
         slint_windowrc_clone(&adopted_inner, &inner);
     }
 
-    this() {
+    void initialize() {
         writeln("Create window, WindowAdapterRc.this(), slint_windowrc_init(): ", inner);
         slint_windowrc_init(&inner);
     }
@@ -38,15 +38,14 @@ public:
     // WindowAdapterRc(const WindowAdapterRc &other) : WindowAdapterRc(other.inner) { }
     // WindowAdapterRc(WindowAdapterRc &&) = delete;
     // WindowAdapterRc &operator=(WindowAdapterRc &&) = delete;
-    // WindowAdapterRc &operator=(const WindowAdapterRc &other)
-    // {
-    //     assert_main_thread();
-    //     if (this != &other) {
-    //         slint_windowrc_drop(&inner);
-    //         slint_windowrc_clone(&other.inner, &inner);
-    //     }
-    //     return *this;
-    // }
+    void opAssign(ref const WindowAdapterRc other) {
+        assert_main_thread();
+        if (&this != &other) {
+            slint_windowrc_drop(&inner);
+            slint_windowrc_clone(&other.inner, &inner);
+        }
+        // return *this;
+    }
 
     void show() const {
         writeln("slint_windowrc_show()");
@@ -255,7 +254,7 @@ public:
     /// \private
     /// Internal function used by the generated code to construct a new instance of this
     /// public API wrapper.
-    this(WindowAdapterRc windowrc) {
+    this(WindowAdapterRc* windowrc) {
         this.inner = windowrc;
     }
     /// Destroys this window. Window instances are explicitly shared and reference counted.
@@ -560,14 +559,14 @@ public:
     // }
 
     /// \private
-    WindowAdapterRc window_handle() {
+    WindowAdapterRc* window_handle() {
         return inner;
     }
     /// \private
-    const(WindowAdapterRc) window_handle() const {
+    const(WindowAdapterRc)* window_handle() const {
         return inner;
     }
 
 private:
-    WindowAdapterRc inner;
+    WindowAdapterRc* inner;
 }

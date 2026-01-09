@@ -219,7 +219,6 @@ extern (C) {
         }
 
         ~this() {
-            writeln("VWeak destructed");
             // if (inner)
             //     inner.weak_ref--;
             // if (inner && !--inner.weak_ref) {

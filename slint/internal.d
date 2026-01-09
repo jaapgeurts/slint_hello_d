@@ -440,8 +440,7 @@ extern (C) {
         /// Add the `ElementName::id` entries of the given item
         bool function(Pin!(VRef!(ItemTreeVTable)), uint32_t item_index, SharedString* result) item_element_infos;
         /// Returns a Window, creating a fresh one if `do_create` is true.
-        void function(Pin!(VRef!(ItemTreeVTable)), bool do_create,
-                Option!(WindowAdapterRc)* result) window_adapter;
+        void function(Pin!(VRef!(ItemTreeVTable)), bool do_create, WindowAdapterRc* result) window_adapter;
         /// in-place destructor (for VRc)
         Layout function(VRefMut!(ItemTreeVTable)) drop_in_place;
         /// dealloc function (for VRc)
