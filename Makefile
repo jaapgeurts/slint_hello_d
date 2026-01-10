@@ -2,6 +2,8 @@ SRCS = slint/builtin_structs_internal.d \
        slint/color.d \
        slint/color_internal.d \
        slint/events_internal.d \
+       slint/interpreter.d \
+       slint/interpreter_internal.d \
        slint/image.d \
        slint/internal.d \
        slint/item_tree.d \
@@ -13,7 +15,7 @@ SRCS = slint/builtin_structs_internal.d \
        slint/vtable.d \
        slint/window.d
 
-all: app app2
+all: app app2 app3
 
 app: $(SRCS) main.d appwindow.d appwindow.h
 	ldc2 --link-defaultlib-debug -L-lslint_cpp -L-L${HOME}/tmp/slint/lib -of $@ --gc $(SRCS) main.d appwindow.d
@@ -21,6 +23,9 @@ app: $(SRCS) main.d appwindow.d appwindow.h
 
 app2: $(SRCS) simple.d appwindow.h
 	ldc2 --link-defaultlib-debug -L-lslint_cpp -L-L${HOME}/tmp/slint/lib -of $@ --gc $(SRCS) simple.d
+
+app3: $(SRCS) simple2.d appwindow.slint
+	ldc2 --link-defaultlib-debug -L-lslint_cpp -L-L${HOME}/tmp/slint/lib -of $@ --gc $(SRCS) simple2.d
 
 appwindow.h: appwindow.slint
 	~/tmp/Slint-cpp-1.14.1-Linux-x86_64/bin/slint-compiler -f cpp -o $@ $<

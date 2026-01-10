@@ -268,7 +268,6 @@ Slice!(T) make_slice(T)(const T* ptr, size_t len) {
 //     return make_slice(span.data(), span.size());
 // }
 
-// Slice!(uint8_t) string_to_slice(string str)
-// {
-//     return make_slice(cast(const uint8_t *)(str.data()), str.size());
-// }
+Slice!ubyte string_to_slice(string str) {
+    return make_slice(cast(const ubyte*) str.ptr, str.length);
+}

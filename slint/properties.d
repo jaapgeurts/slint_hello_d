@@ -116,13 +116,13 @@ extern (C) struct Property(T) {
     // );
 
     void set_binding(F)(F binding) const {
-        static extern (C) void g(void* user_data, void* value) {
+        static extern (C) void actual_cb(void* user_data, void* value) {
             *(cast(T*) value) = (cast(F) user_data)();
         }
 
         writeln("Property.set_binding() called");
 
-        slint_property_set_binding(&inner, &g, cast(void*) binding, null, null, null);
+        slint_property_set_binding(&inner, &actual_cb, cast(void*) binding, null, null, null);
     }
 
     // TODO: check if PropertyAnimation == struct or class.

@@ -27,12 +27,32 @@ extern (C) {
         void* instance;
     }
 
-    alias VRef(T) = VRefMut!T;
-    alias Pin(T) = T;
-
     struct Layout {
         size_t size;
         size_t align_;
+    }
+
+    alias VRef(T) = VRefMut!T;
+    alias Pin(T) = T;
+
+    struct VBox(T) {
+        const T* vtable = null;
+        void* instance = null;
+
+        this() {
+        }
+
+        this(const T* vtable, void* instance) {
+
+            this.vtable = vtable;
+            this.isntance = instance;
+        }
+
+        ~this() {
+            if (vtable && instance) {
+                vtable.drop(VRefMut!(vtable, instance));
+            }
+        }
     }
 
     struct AllowPin;

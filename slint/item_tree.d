@@ -33,7 +33,8 @@ ItemRef get_item_ref(ItemTreeRef item_tree,
 /// The component handle is like a shared pointer to a component in the generated code.
 /// In order to get a component, use `T::create()` where T is the name of the component
 /// in the .slint file. This give you a `ComponentHandle<T>`
-class ComponentHandle(T) {
+extern (C) struct ComponentHandle(T) {
+    // TODO: check if this can be made a pointer.
     private VRc!(ItemTreeVTable, T) inner;
     // friend class ComponentWeakHandle<T>;
 
@@ -80,6 +81,9 @@ public:
     //     private_api::assert_main_thread();
     //     return inner.operator*();
     // }
+    VRc!(ItemTreeVTable, T)* as_ptr() {
+        return &inner;
+    }
 
     /// internal function that returns the internal handle
     VRc!(ItemTreeVTable) into_dyn() {

@@ -15,6 +15,10 @@ extern (C) {
         const(T) opIndex(size_t i) const {
             return ptr[i];
         }
+
+        T[] opSlice(size_t i, size_t j) {
+            return ptr[i .. j];
+        }
     }
 
     /// Returns a nul-terminated pointer for this string.

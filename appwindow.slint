@@ -1,6 +1,20 @@
-export component MainWindow inherits Window {
-    Text {
-        text: "hello world";
-        color: green;
+import { VerticalBox, LineEdit, Button } from "std-widgets.slint";
+export component Recipe inherits Window {
+    callback on_clicked(int,int);
+
+    in-out property <int> counter: 0;
+    VerticalBox {
+        LineEdit {
+            placeholder-text: "Enter text here";
+        }
+        button := Button {
+            text: "Button, pressed " + root.counter + " times";
+            clicked => {
+                root.counter += 1;
+                on_clicked(root.counter,100-root.counter);
+                // tiếng việt
+
+            }
+        }
     }
 }
