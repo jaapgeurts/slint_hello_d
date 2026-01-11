@@ -1,11 +1,16 @@
 import { VerticalBox, LineEdit, Button } from "std-widgets.slint";
 export component Recipe inherits Window {
     callback on_clicked(int,int);
+    callback on_accepted <=> lineedit1.accepted;
 
     in-out property <int> counter: 0;
+
+    in-out property <string> mytext;
+
     VerticalBox {
-        LineEdit {
+        lineedit1 := LineEdit {
             placeholder-text: "Enter text here";
+            text : mytext;
         }
         button := Button {
             text: "Button, pressed " + root.counter + " times";
@@ -13,6 +18,7 @@ export component Recipe inherits Window {
                 root.counter += 1;
                 on_clicked(root.counter,100-root.counter);
                 // tiếng việt
+
 
             }
         }

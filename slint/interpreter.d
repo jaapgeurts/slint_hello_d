@@ -286,7 +286,8 @@ extern (C) {
     struct Value {
     public:
         /// Constructs a new value of type Value::Type::Void.
-        // TODO: make sure this gets called
+        @disable this();
+        // TODO: make sure this gets called for empty constructors
         void initialize() {
             inner = slint_interpreter_value_new();
         }
@@ -296,12 +297,22 @@ extern (C) {
         //     inner = slint_interpreter_value_clone(other.inner);
         // }
 
+        this(Value* other) {
+            this.inner = other;
+        }
+
         /// Constructs a new value by copying \a other.
         this(ref const Value other) {
+            writeln("Value copy constructor");
             inner = slint_interpreter_value_clone(other.inner);
         }
         /// Constructs a new value by moving \a other to this.
         // TODO: move constructor
+        // this(Value other) {
+        //     writeln("Value move constructor");
+        //     inner = other.inner;
+        //     other.inner = slint_interpreter_value_new();
+        // }
         // this(Value &&other)
         // {
         //     inner = other.inner;
@@ -375,15 +386,15 @@ extern (C) {
         /// Type::Model, otherwise an empty optional is returned.
         ///
         /// The vector will be constructed by serializing all the elements of the model.
-        Nullable!(SharedVector!(Value)) to_array() const {
-            SharedVector!Value array;
-            if (slint_interpreter_value_to_array(&inner, cast(SharedVector!(Value*)*)(&array))) {
-                return nullable(array);
-            }
-            else {
-                return typeof(return).init;
-            }
-        }
+        // Nullable!(SharedVector!(Value)) to_array() const {
+        //     SharedVector!Value array;
+        //     if (slint_interpreter_value_to_array(&inner, cast(SharedVector!(Value*)*)(&array))) {
+        //         return nullable(array);
+        //     }
+        //     else {
+        //         return typeof(return).init;
+        //     }
+        // }
 
         /// Returns a std::optional that contains a brush if the type of this Value is
         /// Type::Brush, otherwise an empty optional is returned.
@@ -567,7 +578,9 @@ extern (C) {
             if (Value* prop_inner = slint_interpreter_component_instance_get_property(get_inner(),
                     string_to_slice(name))) {
                 // return Value(std::move(prop_inner));
-                return Value(*prop_inner);
+                // auto number = slint_interpreter_value_to_number(prop_inner);
+                // writeln("get_property(): ", *number);
+                return Value(prop_inner);
             }
             else {
                 return typeof(return).init;

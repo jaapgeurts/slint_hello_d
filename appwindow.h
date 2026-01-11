@@ -913,8 +913,8 @@ class Recipe {
     slint::private_api::Property<slint::private_api::LayoutInfo> root_56_empty_57_layoutinfo_v;
     slint::private_api::Property<slint::private_api::LayoutInfo> root_56_layoutinfo_h;
     slint::private_api::Property<slint::private_api::LayoutInfo> root_56_layoutinfo_v;
-    slint::private_api::Callback<void()> root_56_on_clicked;
-    LineEdit_root_15 lineedit_58;
+    slint::private_api::Callback<void(int, int)> root_56_on_clicked;
+    LineEdit_root_15 lineedit1_58;
     Button_root_26 button_59;
     slint::cbindgen_private::WindowItem root_56 = {};
     auto init (const class SharedGlobals* globals,slint::cbindgen_private::ItemTreeWeak enclosing_component,uint32_t tree_index,uint32_t tree_index_of_first_child) -> void;
@@ -953,11 +953,10 @@ class Recipe {
     ~Recipe ();
     auto get_counter () const -> int;
     auto set_counter (const int &value) const -> void;
-    auto invoke_on_clicked () const -> void;
-    template<std::invocable<> Functor> auto on_on_clicked (Functor && callback_handler) const;
-    private:
-    auto invoke_my_function (int) const = delete /* the function 'my-function' is declared as private. Declare it as 'public' */;
-    public:
+    auto invoke_on_clicked (int arg_0, int arg_1) const -> void;
+    template<std::invocable<int, int> Functor> auto on_on_clicked (Functor && callback_handler) const;
+    auto invoke_on_text (slint::SharedString arg_0) const -> void;
+    template<std::invocable<slint::SharedString> Functor> auto on_on_text (Functor && callback_handler) const;
     auto show () -> void;
     auto hide () -> void;
     auto window () const -> slint::Window&;
@@ -5048,7 +5047,7 @@ inline auto Recipe::init (const class SharedGlobals* globals,slint::cbindgen_pri
     self->globals = globals;
     this->tree_index_of_first_child = tree_index_of_first_child;
     self->tree_index = tree_index;
-    this->lineedit_58.init(globals, self_weak.into_dyn(), tree_index_of_first_child + 1 - 1, tree_index_of_first_child + 3 - 1);
+    this->lineedit1_58.init(globals, self_weak.into_dyn(), tree_index_of_first_child + 1 - 1, tree_index_of_first_child + 3 - 1);
     this->button_59.init(globals, self_weak.into_dyn(), tree_index_of_first_child + 2 - 1, tree_index_of_first_child + 12 - 1);
     self->root_56.background.set_binding([this]() {
                             [[maybe_unused]] auto self = this;
@@ -5057,15 +5056,15 @@ inline auto Recipe::init (const class SharedGlobals* globals,slint::cbindgen_pri
     self->root_56_counter.set(static_cast<int>(0));
     self->root_56_empty_57_layout_cache.set_binding([this]() {
                             [[maybe_unused]] auto self = this;
-                            return slint::private_api::solve_box_layout([&](const auto &a_0, const auto &a_1, const auto &a_2, const auto &a_3, const auto &a_4){ slint::private_api::BoxLayoutData o{}; o.alignment = a_0; o.cells = a_1; o.padding = a_2; o.size = a_3; o.spacing = a_4; return o; }(slint::cbindgen_private::LayoutAlignment::Stretch, slint::private_api::make_slice<slint::cbindgen_private::BoxLayoutCellData>(std::array<slint::cbindgen_private::BoxLayoutCellData, 2>{ slint::cbindgen_private::BoxLayoutCellData ( [&](const auto &a_0){ slint::private_api::BoxLayoutCellData o{}; o.constraint = a_0; return o; }([&]{ [[maybe_unused]] auto layout_info = self->lineedit_58.root_15_layoutinfo_v.get();;return [&](const auto &a_0, const auto &a_1, const auto &a_2, const auto &a_3, const auto &a_4, const auto &a_5){ slint::private_api::LayoutInfo o{}; o.max = a_0; o.max_percent = a_1; o.min = a_2; o.min_percent = a_3; o.preferred = a_4; o.stretch = a_5; return o; }(layout_info.max, layout_info.max_percent, std::max<float>(32, self->lineedit_58.root_15_layout_17_layoutinfo_v.get().min), layout_info.min_percent, layout_info.preferred, 0); }()) ), slint::cbindgen_private::BoxLayoutCellData ( [&](const auto &a_0){ slint::private_api::BoxLayoutCellData o{}; o.constraint = a_0; return o; }([&]{ [[maybe_unused]] auto layout_info = self->button_59.root_26_layoutinfo_v.get();;return [&](const auto &a_0, const auto &a_1, const auto &a_2, const auto &a_3, const auto &a_4, const auto &a_5){ slint::private_api::LayoutInfo o{}; o.max = a_0; o.max_percent = a_1; o.min = a_2; o.min_percent = a_3; o.preferred = a_4; o.stretch = a_5; return o; }(layout_info.max, layout_info.max_percent, std::max<float>(32, self->button_59.root_26_i_layout_29_layoutinfo_v.get().min), layout_info.min_percent, layout_info.preferred, 0); }()) ) }.data(), 2), [&](const auto &a_0, const auto &a_1){ slint::private_api::Padding o{}; o.begin = a_0; o.end = a_1; return o; }(8, 8), self->root_56.height.get(), 8),slint::private_api::make_slice<int>(std::array<int, 0>{  }.data(), 0));
+                            return slint::private_api::solve_box_layout([&](const auto &a_0, const auto &a_1, const auto &a_2, const auto &a_3, const auto &a_4){ slint::private_api::BoxLayoutData o{}; o.alignment = a_0; o.cells = a_1; o.padding = a_2; o.size = a_3; o.spacing = a_4; return o; }(slint::cbindgen_private::LayoutAlignment::Stretch, slint::private_api::make_slice<slint::cbindgen_private::BoxLayoutCellData>(std::array<slint::cbindgen_private::BoxLayoutCellData, 2>{ slint::cbindgen_private::BoxLayoutCellData ( [&](const auto &a_0){ slint::private_api::BoxLayoutCellData o{}; o.constraint = a_0; return o; }([&]{ [[maybe_unused]] auto layout_info = self->lineedit1_58.root_15_layoutinfo_v.get();;return [&](const auto &a_0, const auto &a_1, const auto &a_2, const auto &a_3, const auto &a_4, const auto &a_5){ slint::private_api::LayoutInfo o{}; o.max = a_0; o.max_percent = a_1; o.min = a_2; o.min_percent = a_3; o.preferred = a_4; o.stretch = a_5; return o; }(layout_info.max, layout_info.max_percent, std::max<float>(32, self->lineedit1_58.root_15_layout_17_layoutinfo_v.get().min), layout_info.min_percent, layout_info.preferred, 0); }()) ), slint::cbindgen_private::BoxLayoutCellData ( [&](const auto &a_0){ slint::private_api::BoxLayoutCellData o{}; o.constraint = a_0; return o; }([&]{ [[maybe_unused]] auto layout_info = self->button_59.root_26_layoutinfo_v.get();;return [&](const auto &a_0, const auto &a_1, const auto &a_2, const auto &a_3, const auto &a_4, const auto &a_5){ slint::private_api::LayoutInfo o{}; o.max = a_0; o.max_percent = a_1; o.min = a_2; o.min_percent = a_3; o.preferred = a_4; o.stretch = a_5; return o; }(layout_info.max, layout_info.max_percent, std::max<float>(32, self->button_59.root_26_i_layout_29_layoutinfo_v.get().min), layout_info.min_percent, layout_info.preferred, 0); }()) ) }.data(), 2), [&](const auto &a_0, const auto &a_1){ slint::private_api::Padding o{}; o.begin = a_0; o.end = a_1; return o; }(8, 8), self->root_56.height.get(), 8),slint::private_api::make_slice<int>(std::array<int, 0>{  }.data(), 0));
                         });
     self->root_56_empty_57_layoutinfo_h.set_binding([this]() {
                             [[maybe_unused]] auto self = this;
-                            return slint::private_api::box_layout_info_ortho(slint::private_api::make_slice<slint::cbindgen_private::BoxLayoutCellData>(std::array<slint::cbindgen_private::BoxLayoutCellData, 2>{ slint::cbindgen_private::BoxLayoutCellData ( [&](const auto &a_0){ slint::private_api::BoxLayoutCellData o{}; o.constraint = a_0; return o; }([&]{ [[maybe_unused]] auto layout_info = self->lineedit_58.root_15_layoutinfo_h.get();;return [&](const auto &a_0, const auto &a_1, const auto &a_2, const auto &a_3, const auto &a_4, const auto &a_5){ slint::private_api::LayoutInfo o{}; o.max = a_0; o.max_percent = a_1; o.min = a_2; o.min_percent = a_3; o.preferred = a_4; o.stretch = a_5; return o; }(layout_info.max, layout_info.max_percent, std::max<float>(160, self->lineedit_58.root_15_layout_17_layoutinfo_h.get().min), layout_info.min_percent, layout_info.preferred, 1); }()) ), slint::cbindgen_private::BoxLayoutCellData ( [&](const auto &a_0){ slint::private_api::BoxLayoutCellData o{}; o.constraint = a_0; return o; }([&]{ [[maybe_unused]] auto layout_info = self->button_59.root_26_layoutinfo_h.get();;return [&](const auto &a_0, const auto &a_1, const auto &a_2, const auto &a_3, const auto &a_4, const auto &a_5){ slint::private_api::LayoutInfo o{}; o.max = a_0; o.max_percent = a_1; o.min = a_2; o.min_percent = a_3; o.preferred = a_4; o.stretch = a_5; return o; }(layout_info.max, layout_info.max_percent, std::max<float>(32, self->button_59.root_26_i_layout_29_layoutinfo_h.get().min), layout_info.min_percent, layout_info.preferred, 0); }()) ) }.data(), 2),[&](const auto &a_0, const auto &a_1){ slint::private_api::Padding o{}; o.begin = a_0; o.end = a_1; return o; }(8, 8));
+                            return slint::private_api::box_layout_info_ortho(slint::private_api::make_slice<slint::cbindgen_private::BoxLayoutCellData>(std::array<slint::cbindgen_private::BoxLayoutCellData, 2>{ slint::cbindgen_private::BoxLayoutCellData ( [&](const auto &a_0){ slint::private_api::BoxLayoutCellData o{}; o.constraint = a_0; return o; }([&]{ [[maybe_unused]] auto layout_info = self->lineedit1_58.root_15_layoutinfo_h.get();;return [&](const auto &a_0, const auto &a_1, const auto &a_2, const auto &a_3, const auto &a_4, const auto &a_5){ slint::private_api::LayoutInfo o{}; o.max = a_0; o.max_percent = a_1; o.min = a_2; o.min_percent = a_3; o.preferred = a_4; o.stretch = a_5; return o; }(layout_info.max, layout_info.max_percent, std::max<float>(160, self->lineedit1_58.root_15_layout_17_layoutinfo_h.get().min), layout_info.min_percent, layout_info.preferred, 1); }()) ), slint::cbindgen_private::BoxLayoutCellData ( [&](const auto &a_0){ slint::private_api::BoxLayoutCellData o{}; o.constraint = a_0; return o; }([&]{ [[maybe_unused]] auto layout_info = self->button_59.root_26_layoutinfo_h.get();;return [&](const auto &a_0, const auto &a_1, const auto &a_2, const auto &a_3, const auto &a_4, const auto &a_5){ slint::private_api::LayoutInfo o{}; o.max = a_0; o.max_percent = a_1; o.min = a_2; o.min_percent = a_3; o.preferred = a_4; o.stretch = a_5; return o; }(layout_info.max, layout_info.max_percent, std::max<float>(32, self->button_59.root_26_i_layout_29_layoutinfo_h.get().min), layout_info.min_percent, layout_info.preferred, 0); }()) ) }.data(), 2),[&](const auto &a_0, const auto &a_1){ slint::private_api::Padding o{}; o.begin = a_0; o.end = a_1; return o; }(8, 8));
                         });
     self->root_56_empty_57_layoutinfo_v.set_binding([this]() {
                             [[maybe_unused]] auto self = this;
-                            return slint::private_api::box_layout_info(slint::private_api::make_slice<slint::cbindgen_private::BoxLayoutCellData>(std::array<slint::cbindgen_private::BoxLayoutCellData, 2>{ slint::cbindgen_private::BoxLayoutCellData ( [&](const auto &a_0){ slint::private_api::BoxLayoutCellData o{}; o.constraint = a_0; return o; }([&]{ [[maybe_unused]] auto layout_info = self->lineedit_58.root_15_layoutinfo_v.get();;return [&](const auto &a_0, const auto &a_1, const auto &a_2, const auto &a_3, const auto &a_4, const auto &a_5){ slint::private_api::LayoutInfo o{}; o.max = a_0; o.max_percent = a_1; o.min = a_2; o.min_percent = a_3; o.preferred = a_4; o.stretch = a_5; return o; }(layout_info.max, layout_info.max_percent, std::max<float>(32, self->lineedit_58.root_15_layout_17_layoutinfo_v.get().min), layout_info.min_percent, layout_info.preferred, 0); }()) ), slint::cbindgen_private::BoxLayoutCellData ( [&](const auto &a_0){ slint::private_api::BoxLayoutCellData o{}; o.constraint = a_0; return o; }([&]{ [[maybe_unused]] auto layout_info = self->button_59.root_26_layoutinfo_v.get();;return [&](const auto &a_0, const auto &a_1, const auto &a_2, const auto &a_3, const auto &a_4, const auto &a_5){ slint::private_api::LayoutInfo o{}; o.max = a_0; o.max_percent = a_1; o.min = a_2; o.min_percent = a_3; o.preferred = a_4; o.stretch = a_5; return o; }(layout_info.max, layout_info.max_percent, std::max<float>(32, self->button_59.root_26_i_layout_29_layoutinfo_v.get().min), layout_info.min_percent, layout_info.preferred, 0); }()) ) }.data(), 2),8,[&](const auto &a_0, const auto &a_1){ slint::private_api::Padding o{}; o.begin = a_0; o.end = a_1; return o; }(8, 8),slint::cbindgen_private::LayoutAlignment::Stretch);
+                            return slint::private_api::box_layout_info(slint::private_api::make_slice<slint::cbindgen_private::BoxLayoutCellData>(std::array<slint::cbindgen_private::BoxLayoutCellData, 2>{ slint::cbindgen_private::BoxLayoutCellData ( [&](const auto &a_0){ slint::private_api::BoxLayoutCellData o{}; o.constraint = a_0; return o; }([&]{ [[maybe_unused]] auto layout_info = self->lineedit1_58.root_15_layoutinfo_v.get();;return [&](const auto &a_0, const auto &a_1, const auto &a_2, const auto &a_3, const auto &a_4, const auto &a_5){ slint::private_api::LayoutInfo o{}; o.max = a_0; o.max_percent = a_1; o.min = a_2; o.min_percent = a_3; o.preferred = a_4; o.stretch = a_5; return o; }(layout_info.max, layout_info.max_percent, std::max<float>(32, self->lineedit1_58.root_15_layout_17_layoutinfo_v.get().min), layout_info.min_percent, layout_info.preferred, 0); }()) ), slint::cbindgen_private::BoxLayoutCellData ( [&](const auto &a_0){ slint::private_api::BoxLayoutCellData o{}; o.constraint = a_0; return o; }([&]{ [[maybe_unused]] auto layout_info = self->button_59.root_26_layoutinfo_v.get();;return [&](const auto &a_0, const auto &a_1, const auto &a_2, const auto &a_3, const auto &a_4, const auto &a_5){ slint::private_api::LayoutInfo o{}; o.max = a_0; o.max_percent = a_1; o.min = a_2; o.min_percent = a_3; o.preferred = a_4; o.stretch = a_5; return o; }(layout_info.max, layout_info.max_percent, std::max<float>(32, self->button_59.root_26_i_layout_29_layoutinfo_v.get().min), layout_info.min_percent, layout_info.preferred, 0); }()) ) }.data(), 2),8,[&](const auto &a_0, const auto &a_1){ slint::private_api::Padding o{}; o.begin = a_0; o.end = a_1; return o; }(8, 8),slint::cbindgen_private::LayoutAlignment::Stretch);
                         });
     self->root_56_layoutinfo_h.set_binding([this]() {
                             [[maybe_unused]] auto self = this;
@@ -5076,24 +5075,24 @@ inline auto Recipe::init (const class SharedGlobals* globals,slint::cbindgen_pri
                             return (slint::private_api::item_layout_info(SLINT_GET_ITEM_VTABLE(WindowItemVTable), const_cast<slint::cbindgen_private::WindowItem*>(&self->root_56), slint::cbindgen_private::Orientation::Vertical, &self->globals->window().window_handle(), self->self_weak.lock()->into_dyn(), self->tree_index) + self->root_56_empty_57_layoutinfo_v.get());
                         });
     self->root_56.title.set(slint::SharedString(u8"Slint Window"));
-    self->lineedit_58.root_15_height.set_binding([this]() {
+    self->lineedit1_58.root_15_height.set_binding([this]() {
                             [[maybe_unused]] auto self = this;
                             return self->root_56_empty_57_layout_cache.get()[1];
                         });
-    self->lineedit_58.base_18.root_1_placeholder_text.set(slint::SharedString(u8"Enter text here"));
-    self->lineedit_58.root_15_width.set_binding([this]() {
+    self->lineedit1_58.base_18.root_1_placeholder_text.set(slint::SharedString(u8"Enter text here"));
+    self->lineedit1_58.root_15_width.set_binding([this]() {
                             [[maybe_unused]] auto self = this;
                             return ((self->root_56.width.get() -(float) 8) -(float) 8);
                         });
-    self->lineedit_58.root_15_x.set(8);
-    self->lineedit_58.root_15_y.set_binding([this]() {
+    self->lineedit1_58.root_15_x.set(8);
+    self->lineedit1_58.root_15_y.set_binding([this]() {
                             [[maybe_unused]] auto self = this;
                             return self->root_56_empty_57_layout_cache.get()[0];
                         });
     self->button_59.root_26_clicked.set_handler(
                     [this]() {
                         [[maybe_unused]] auto self = this;
-                        [&]{ self->root_56_counter.set((self->root_56_counter.get() + static_cast<int>(1)));self->root_56_on_clicked.call(); }();
+                        [&]{ self->root_56_counter.set((self->root_56_counter.get() + static_cast<int>(1)));self->root_56_on_clicked.call(self->root_56_counter.get(),static_cast<int>((100 -(float) self->root_56_counter.get()))); }();
                     });
     self->button_59.root_26_height.set_binding([this]() {
                             [[maybe_unused]] auto self = this;
@@ -5120,14 +5119,14 @@ inline auto Recipe::init (const class SharedGlobals* globals,slint::cbindgen_pri
     self->root_56.no_frame.set_constant();
     self->root_56.resize_border_width.set_constant();
     self->root_56.title.set_constant();
-    self->lineedit_58.root_15_x.set_constant();
+    self->lineedit1_58.root_15_x.set_constant();
     self->button_59.root_26_icon.set_constant();
     self->button_59.root_26_x.set_constant();
 }
 
 inline auto Recipe::user_init () -> void{
     [[maybe_unused]] auto self = this;
-    this->lineedit_58.user_init();
+    this->lineedit1_58.user_init();
     this->button_59.user_init();
     ;
 }
@@ -5145,9 +5144,9 @@ inline auto Recipe::item_geometry (uint32_t index) const -> slint::cbindgen_priv
         case 2: return slint::private_api::convert_anonymous_rect(std::make_tuple(float(self->root_56_empty_57_layout_cache.get()[3]), float(((self->root_56.width.get() -(float) 8) -(float) 8)), float(8), float(self->root_56_empty_57_layout_cache.get()[2])));
     }
     if (index == 1) {
-        return self->lineedit_58.item_geometry(0);
+        return self->lineedit1_58.item_geometry(0);
     } else if (index >= 3 && index < 12) {
-        return self->lineedit_58.item_geometry(index - 2);
+        return self->lineedit1_58.item_geometry(index - 2);
     } else if (index == 2) {
         return self->button_59.item_geometry(0);
     } else if (index >= 12 && index < 19) {
@@ -5162,9 +5161,9 @@ inline auto Recipe::accessible_role (uint32_t index) const -> slint::cbindgen_pr
         case 2: return slint::cbindgen_private::AccessibleRole::Button;
     }
     if (index == 1) {
-        return self->lineedit_58.accessible_role(0);
+        return self->lineedit1_58.accessible_role(0);
     } else if (index >= 3 && index < 12) {
-        return self->lineedit_58.accessible_role(index - 2);
+        return self->lineedit1_58.accessible_role(index - 2);
     } else if (index == 2) {
         return self->button_59.accessible_role(0);
     } else if (index >= 12 && index < 19) {
@@ -5175,19 +5174,19 @@ inline auto Recipe::accessible_role (uint32_t index) const -> slint::cbindgen_pr
 inline auto Recipe::accessible_string_property (uint32_t index, slint::cbindgen_private::AccessibleStringProperty what) const -> std::optional<slint::SharedString>{
     [[maybe_unused]] auto self = this;
     switch ((index << 8) | uintptr_t(what)) {
-        case (1 << 8) | uintptr_t(slint::cbindgen_private::AccessibleStringProperty::Enabled): return [&]() -> slint::SharedString { if (self->lineedit_58.base_18.text_input_5.enabled.get()) { return slint::SharedString(u8"true"); } else { return slint::SharedString(u8"false"); }}();
-        case (1 << 8) | uintptr_t(slint::cbindgen_private::AccessibleStringProperty::PlaceholderText): return self->lineedit_58.base_18.root_1_placeholder_text.get();
-        case (1 << 8) | uintptr_t(slint::cbindgen_private::AccessibleStringProperty::ReadOnly): return [&]() -> slint::SharedString { if (self->lineedit_58.base_18.text_input_5.read_only.get()) { return slint::SharedString(u8"true"); } else { return slint::SharedString(u8"false"); }}();
-        case (1 << 8) | uintptr_t(slint::cbindgen_private::AccessibleStringProperty::Value): return self->lineedit_58.base_18.text_input_5.text.get();
+        case (1 << 8) | uintptr_t(slint::cbindgen_private::AccessibleStringProperty::Enabled): return [&]() -> slint::SharedString { if (self->lineedit1_58.base_18.text_input_5.enabled.get()) { return slint::SharedString(u8"true"); } else { return slint::SharedString(u8"false"); }}();
+        case (1 << 8) | uintptr_t(slint::cbindgen_private::AccessibleStringProperty::PlaceholderText): return self->lineedit1_58.base_18.root_1_placeholder_text.get();
+        case (1 << 8) | uintptr_t(slint::cbindgen_private::AccessibleStringProperty::ReadOnly): return [&]() -> slint::SharedString { if (self->lineedit1_58.base_18.text_input_5.read_only.get()) { return slint::SharedString(u8"true"); } else { return slint::SharedString(u8"false"); }}();
+        case (1 << 8) | uintptr_t(slint::cbindgen_private::AccessibleStringProperty::Value): return self->lineedit1_58.base_18.text_input_5.text.get();
         case (2 << 8) | uintptr_t(slint::cbindgen_private::AccessibleStringProperty::Checkable): return [&]() -> slint::SharedString { if (false) { return slint::SharedString(u8"true"); } else { return slint::SharedString(u8"false"); }}();
         case (2 << 8) | uintptr_t(slint::cbindgen_private::AccessibleStringProperty::Checked): return [&]() -> slint::SharedString { if (self->button_59.root_26_checked.get()) { return slint::SharedString(u8"true"); } else { return slint::SharedString(u8"false"); }}();
         case (2 << 8) | uintptr_t(slint::cbindgen_private::AccessibleStringProperty::Enabled): return [&]() -> slint::SharedString { if (self->button_59.i_focus_scope_35.enabled.get()) { return slint::SharedString(u8"true"); } else { return slint::SharedString(u8"false"); }}();
         case (2 << 8) | uintptr_t(slint::cbindgen_private::AccessibleStringProperty::Label): return self->button_59.root_26_text.get();
     }
     if (index == 1) {
-        return self->lineedit_58.accessible_string_property(0, what);
+        return self->lineedit1_58.accessible_string_property(0, what);
     } else if (index >= 3 && index < 12) {
-        return self->lineedit_58.accessible_string_property(index - 2, what);
+        return self->lineedit1_58.accessible_string_property(index - 2, what);
     } else if (index == 2) {
         return self->button_59.accessible_string_property(0, what);
     } else if (index >= 12 && index < 19) {
@@ -5198,13 +5197,13 @@ inline auto Recipe::accessible_string_property (uint32_t index, slint::cbindgen_
 inline auto Recipe::accessibility_action (uint32_t index, const slint::cbindgen_private::AccessibilityAction &action) const -> void{
     [[maybe_unused]] auto self = this;
     switch ((index << 8) | uintptr_t(action.tag)) {
-        case (1 << 8) | uintptr_t(slint::cbindgen_private::AccessibilityAction::Tag::SetValue): { auto arg_0 = action.set_value._0; return self->lineedit_58.root_15_accessible_action_set_value.call(arg_0); }
+        case (1 << 8) | uintptr_t(slint::cbindgen_private::AccessibilityAction::Tag::SetValue): { auto arg_0 = action.set_value._0; return self->lineedit1_58.root_15_accessible_action_set_value.call(arg_0); }
         case (2 << 8) | uintptr_t(slint::cbindgen_private::AccessibilityAction::Tag::Default): return self->button_59.root_26_accessible_action_default.call();
     }
     if (index == 1) {
-        return self->lineedit_58.accessibility_action(0, action);
+        return self->lineedit1_58.accessibility_action(0, action);
     } else if (index >= 3 && index < 12) {
-        return self->lineedit_58.accessibility_action(index - 2, action);
+        return self->lineedit1_58.accessibility_action(index - 2, action);
     } else if (index == 2) {
         return self->button_59.accessibility_action(0, action);
     } else if (index >= 12 && index < 19) {
@@ -5219,9 +5218,9 @@ inline auto Recipe::supported_accessibility_actions (uint32_t index) const -> ui
         case 2: return slint::cbindgen_private::SupportedAccessibilityAction_Default;
     }
     if (index == 1) {
-        return self->lineedit_58.supported_accessibility_actions(0);
+        return self->lineedit1_58.supported_accessibility_actions(0);
     } else if (index >= 3 && index < 12) {
-        return self->lineedit_58.supported_accessibility_actions(index - 2);
+        return self->lineedit1_58.supported_accessibility_actions(index - 2);
     } else if (index == 2) {
         return self->button_59.supported_accessibility_actions(0);
     } else if (index >= 12 && index < 19) {
@@ -5234,9 +5233,9 @@ inline auto Recipe::element_infos (uint32_t index) const -> std::optional<slint:
     switch (index) {
     }
     if (index == 1) {
-        return self->lineedit_58.element_infos(0);
+        return self->lineedit1_58.element_infos(0);
     } else if (index >= 3 && index < 12) {
-        return self->lineedit_58.element_infos(index - 2);
+        return self->lineedit1_58.element_infos(index - 2);
     } else if (index == 2) {
         return self->button_59.element_infos(0);
     } else if (index >= 12 && index < 19) {
@@ -5248,7 +5247,7 @@ inline auto Recipe::visit_dynamic_children (uint32_t dyn_index, [[maybe_unused]]
         auto self = this;
         switch(dyn_index) { 
         case 0: case 1:  {
-                        return self->lineedit_58.visit_dynamic_children(dyn_index - 0, order, visitor);
+                        return self->lineedit1_58.visit_dynamic_children(dyn_index - 0, order, visitor);
                     }
         case 2: case 3: case 4:  {
                         return self->button_59.visit_dynamic_children(dyn_index - 2, order, visitor);
@@ -5260,7 +5259,7 @@ inline auto Recipe::subtree_range (uintptr_t dyn_index) const -> slint::private_
     [[maybe_unused]] auto self = this;
         switch(dyn_index) { 
         case 0: case 1:  {
-                        return self->lineedit_58.subtree_range(dyn_index - 0);
+                        return self->lineedit1_58.subtree_range(dyn_index - 0);
                     }
         case 2: case 3: case 4:  {
                         return self->button_59.subtree_range(dyn_index - 2);
@@ -5272,7 +5271,7 @@ inline auto Recipe::subtree_component (uintptr_t dyn_index, [[maybe_unused]] uin
     [[maybe_unused]] auto self = this;
         switch(dyn_index) { 
         case 0: case 1:  {
-                        self->lineedit_58.subtree_component(dyn_index - 0, subtree_index, result);
+                        self->lineedit1_58.subtree_component(dyn_index - 0, subtree_index, result);
                         return;
                     }
         case 2: case 3: case 4:  {
@@ -5347,15 +5346,15 @@ slint::private_api::make_dyn_node(3, 12) };
 inline auto Recipe::item_array () -> const slint::private_api::ItemArray{
     static const slint::private_api::ItemArrayEntry items[] {
         { SLINT_GET_ITEM_VTABLE(WindowItemVTable),  offsetof(Recipe, root_56) }, 
-{ SLINT_GET_ITEM_VTABLE(EmptyVTable), offsetof(Recipe, lineedit_58) +  offsetof(LineEdit_root_15, root_15) }, 
+{ SLINT_GET_ITEM_VTABLE(EmptyVTable), offsetof(Recipe, lineedit1_58) +  offsetof(LineEdit_root_15, root_15) }, 
 { SLINT_GET_ITEM_VTABLE(EmptyVTable), offsetof(Recipe, button_59) +  offsetof(Button_root_26, root_26) }, 
-{ SLINT_GET_ITEM_VTABLE(BasicBorderRectangleVTable), offsetof(Recipe, lineedit_58) +  offsetof(LineEdit_root_15, background_16) }, 
-{ SLINT_GET_ITEM_VTABLE(EmptyVTable), offsetof(Recipe, lineedit_58) + offsetof(LineEdit_root_15, base_18) +  offsetof(LineEditBase_root_1, root_1) }, 
-{ SLINT_GET_ITEM_VTABLE(RectangleVTable), offsetof(Recipe, lineedit_58) +  offsetof(LineEdit_root_15, focus_border_23) }, 
-{ SLINT_GET_ITEM_VTABLE(ClipVTable), offsetof(Recipe, lineedit_58) + offsetof(LineEdit_root_15, base_18) +  offsetof(LineEditBase_root_1, root_clip_2) }, 
-{ SLINT_GET_ITEM_VTABLE(ComplexTextVTable), offsetof(Recipe, lineedit_58) + offsetof(LineEdit_root_15, base_18) +  offsetof(LineEditBase_root_1, placeholder_3) }, 
-{ SLINT_GET_ITEM_VTABLE(ContextMenuVTable), offsetof(Recipe, lineedit_58) + offsetof(LineEdit_root_15, base_18) +  offsetof(LineEditBase_root_1, contextmenuinternal_4) }, 
-{ SLINT_GET_ITEM_VTABLE(TextInputVTable), offsetof(Recipe, lineedit_58) + offsetof(LineEdit_root_15, base_18) +  offsetof(LineEditBase_root_1, text_input_5) }, 
+{ SLINT_GET_ITEM_VTABLE(BasicBorderRectangleVTable), offsetof(Recipe, lineedit1_58) +  offsetof(LineEdit_root_15, background_16) }, 
+{ SLINT_GET_ITEM_VTABLE(EmptyVTable), offsetof(Recipe, lineedit1_58) + offsetof(LineEdit_root_15, base_18) +  offsetof(LineEditBase_root_1, root_1) }, 
+{ SLINT_GET_ITEM_VTABLE(RectangleVTable), offsetof(Recipe, lineedit1_58) +  offsetof(LineEdit_root_15, focus_border_23) }, 
+{ SLINT_GET_ITEM_VTABLE(ClipVTable), offsetof(Recipe, lineedit1_58) + offsetof(LineEdit_root_15, base_18) +  offsetof(LineEditBase_root_1, root_clip_2) }, 
+{ SLINT_GET_ITEM_VTABLE(ComplexTextVTable), offsetof(Recipe, lineedit1_58) + offsetof(LineEdit_root_15, base_18) +  offsetof(LineEditBase_root_1, placeholder_3) }, 
+{ SLINT_GET_ITEM_VTABLE(ContextMenuVTable), offsetof(Recipe, lineedit1_58) + offsetof(LineEdit_root_15, base_18) +  offsetof(LineEditBase_root_1, contextmenuinternal_4) }, 
+{ SLINT_GET_ITEM_VTABLE(TextInputVTable), offsetof(Recipe, lineedit1_58) + offsetof(LineEdit_root_15, base_18) +  offsetof(LineEditBase_root_1, text_input_5) }, 
 { SLINT_GET_ITEM_VTABLE(BasicBorderRectangleVTable), offsetof(Recipe, button_59) +  offsetof(Button_root_26, i_background_27) }, 
 { SLINT_GET_ITEM_VTABLE(TouchAreaVTable), offsetof(Recipe, button_59) +  offsetof(Button_root_26, i_touch_area_34) }, 
 { SLINT_GET_ITEM_VTABLE(FocusScopeVTable), offsetof(Recipe, button_59) +  offsetof(Button_root_26, i_focus_scope_35) }, 
@@ -5425,16 +5424,28 @@ inline auto Recipe::set_counter (const int &value) const -> void{
     self->root_56_counter.set(value);
 }
 
-inline auto Recipe::invoke_on_clicked () const -> void{
+inline auto Recipe::invoke_on_clicked (int arg_0, int arg_1) const -> void{
     slint::private_api::assert_main_thread();
     [[maybe_unused]] auto self = this;
-    return self->root_56_on_clicked.call();
+    return self->root_56_on_clicked.call(arg_0, arg_1);
 }
 
-template<std::invocable<> Functor> inline auto Recipe::on_on_clicked (Functor && callback_handler) const{
+template<std::invocable<int, int> Functor> inline auto Recipe::on_on_clicked (Functor && callback_handler) const{
     slint::private_api::assert_main_thread();
     [[maybe_unused]] auto self = this;
     self->root_56_on_clicked.set_handler(std::forward<Functor>(callback_handler));
+}
+
+inline auto Recipe::invoke_on_text (slint::SharedString arg_0) const -> void{
+    slint::private_api::assert_main_thread();
+    [[maybe_unused]] auto self = this;
+    return self->lineedit1_58.base_18.root_1_accepted.call(arg_0);
+}
+
+template<std::invocable<slint::SharedString> Functor> inline auto Recipe::on_on_text (Functor && callback_handler) const{
+    slint::private_api::assert_main_thread();
+    [[maybe_unused]] auto self = this;
+    self->lineedit1_58.base_18.root_1_accepted.set_handler(std::forward<Functor>(callback_handler));
 }
 
 inline auto Recipe::show () -> void{
